@@ -1,0 +1,65 @@
+allow:
+  itemdropping: false
+  dropsOnDeath: false
+
+Kits:
+  default:
+    items:
+      helmet: leather
+      chestplate: leather
+      leggings: leather
+      boots: leather
+      0: '272'
+      1: '261'
+      2: '282'
+      3: '282'
+      4: '282'
+      5: '282'
+      6: '282'
+      7: '282'
+      8: '282'
+      9: '282'
+      10: '282'
+      11: '282'
+      12: '282'
+      13: '282'
+      14: '282'
+      15: '282'
+      16: '282'
+      17: '282'
+      18: '282'
+      19: '282'
+      20: '282'
+      21: '282'
+      22: '282'
+      23: '282'
+      24: '282'
+      25: '282'
+      26: '282'
+      27: '282'
+      28: '282'
+      29: '282'
+      30: '282'
+      31: '282'
+      32: '282'
+      33: '262:64'
+      34: '262:64'
+      35: '0'
+#      helmetEnchant: '0:1'
+#      chestplateEnchant: '0:1'
+#      leggingsEnchant: '0:1'
+#      bootsEnchant: '0:1'
+    
+Money-To-Give-Per-Kill: 10
+Money-To-Give-On-3-KillStreak: 30
+Money-To-Give-On-5-KillStreak: 50
+Money-To-Give-On-7-KillStreak: 70
+Money-To-Give-On-10-KillStreak: 100
+Money-To-Give-On-15-KillStreak: 150
+Money-To-Give-On-20-KillStreak: 200
+
+Fly-Cooldown-Cupid-Kit: 60
+
+Fly-Length-Cupid-Kit: 6
+
+Scoreboard-Show-Time: 10

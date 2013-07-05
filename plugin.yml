@@ -1,0 +1,35 @@
+main: me.kreashenz.kitpvp.KitPvP
+name: Kreas-Kit
+description: Kreas-Kit 2.0
+version: 2.0
+depend: [Vault]
+# Vault is used to give the players their money rewards. 
+commands:
+  archer:
+    description: Choose the archer kit.
+    default: true
+  pvp:
+    description: Choose the pvp kit.
+    default: true
+  pyro:
+    description: Choose the pyro kit.
+    default: true
+  admin:
+    description: Talk in admin chat.
+    default: op
+    aliases: [a, adminchat]
+  tank:
+    description: Choose the tank kit.
+    default: true
+  stats:
+    description: Show your stats.
+    default: true
+  medic:
+    description: Choose the medic kit.
+    default: true
+  refill:
+    description: Refill your bowls
+    default: true
+  cupid:
+    description: Choose the cupid kit.
+    default: true
