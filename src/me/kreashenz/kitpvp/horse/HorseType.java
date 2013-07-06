@@ -6,6 +6,11 @@ import java.util.Map.Entry;
 
 public enum HorseType {
 
+	/*
+	 * Thanks to
+	 * @author DarkBladee12 for doing this!
+	 */
+
 	NORMAL("normal", 0), DONKEY("donkey", 1), MULE("mule", 2), UNDEAD("undead", 3), SKELETAL("skeletal", 4);
 
 	private String name;

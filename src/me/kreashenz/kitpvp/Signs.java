@@ -42,9 +42,8 @@ public class Signs implements Listener {
 								p.sendMessage("§cYou do not have permission to refill.");
 								return;
 							}
-							p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP, 1));
-							p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP, 1));
-							p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP, 1));
+							for(int i = 1; i <= 1; i++)
+							p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP, 3));
 						}
 						if(lines[1].equalsIgnoreCase("Pyro")){
 							if(!p.hasPermission("kitpvp.pyro")){
@@ -100,15 +99,15 @@ public class Signs implements Listener {
 							plugin.kits.giveKit(p, lines[1]);
 							p.updateInventory();
 						}
-					}
-					if(lines[1].equalsIgnoreCase("cupid")){
-						if(!p.hasPermission("kitpvp.cupid")){
-							p.sendMessage("§cYou do not have permission to use the Cupid kit.");
-							return;
+						if(lines[1].equalsIgnoreCase("cupid")){
+							if(!p.hasPermission("kitpvp.cupid")){
+								p.sendMessage("§cYou do not have permission to use the Cupid kit.");
+								return;
+							}
+							p.getInventory().clear();
+							kits.CupidKit(p);
+							p.updateInventory();
 						}
-						p.getInventory().clear();
-						kits.CupidKit(p);
-						p.updateInventory();
 					}
 				} else p.sendMessage("§cYou don't have permission to use signs.");
 			}

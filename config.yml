@@ -1,3 +1,5 @@
+version: 2.2 # Don't edit this, it will cause Kreas-Kits to break!
+
 allow:
   itemdropping: false
   dropsOnDeath: false

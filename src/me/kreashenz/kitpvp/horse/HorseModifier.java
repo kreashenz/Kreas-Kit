@@ -9,6 +9,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class HorseModifier {
 
+	/*
+	 * Thanks to
+	 * @author DarkBladee12 for doing this!
+	 */
+
 	private Object entityHorse;
 	private Object nbtTagCompound;
 
@@ -106,35 +111,35 @@ public class HorseModifier {
 	}
 
 	public HorseType getType() {
-		return HorseType.fromId((int) NBTUtil.getValue(nbtTagCompound, Integer.class, "Type"));
+		return HorseType.fromId((Integer) NBTUtil.getValue(nbtTagCompound, Integer.class, "Type"));
 	}
 
 	public boolean isChested() {
-		return (boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "ChestedHorse");
+		return (Boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "ChestedHorse");
 	}
 
 	public boolean isEating() {
-		return (boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "EatingHaystack");
+		return (Boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "EatingHaystack");
 	}
 
 	public boolean isBred() {
-		return (boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "Bred");
+		return (Boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "Bred");
 	}
 
 	public HorseVariant getVariant() {
-		return HorseVariant.fromId((int) NBTUtil.getValue(nbtTagCompound, Integer.class, "Variant"));
+		return HorseVariant.fromId((Integer) NBTUtil.getValue(nbtTagCompound, Integer.class, "Variant"));
 	}
 
 	public int getTemper() {
-		return (int) NBTUtil.getValue(nbtTagCompound, Integer.class, "Temper");
+		return (Integer) NBTUtil.getValue(nbtTagCompound, Integer.class, "Temper");
 	}
 
 	public boolean isTamed() {
-		return (boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "Tame");
+		return (Boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "Tame");
 	}
 
 	public boolean isSaddled() {
-		return (boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "Saddle");
+		return (Boolean) NBTUtil.getValue(nbtTagCompound, Boolean.class, "Saddle");
 	}
 
 	public ItemStack getArmorItem() {

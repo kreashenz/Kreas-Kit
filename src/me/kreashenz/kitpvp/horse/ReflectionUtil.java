@@ -7,7 +7,12 @@ import org.bukkit.Bukkit;
 
 
 public class ReflectionUtil {
-	
+
+	/*
+	 * Thanks to
+	 * @author DarkBladee12 for doing this!
+	 */
+
 	public static Object getClass(String name, Object... args) throws Exception {
 		Class<?> c = Class.forName(ReflectionUtil.getPackageName() + "." + name);
 		int params = 0;

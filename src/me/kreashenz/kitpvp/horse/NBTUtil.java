@@ -3,7 +3,12 @@ package me.kreashenz.kitpvp.horse;
 import java.lang.reflect.Method;
 
 public class NBTUtil {
-	
+
+	/*
+	 * Thanks to
+	 * @author DarkBladee12 for doing this!
+	 */
+
 	public static Object getNBTTagCompound(Object entity) {
 		try {
 			Object nbtTagCompound = ReflectionUtil.getClass("NBTTagCompound");
@@ -66,7 +71,7 @@ public class NBTUtil {
 
 	public static boolean hasKey(Object nbtTagCompound, String key) {
 		try {
-			return (boolean) ReflectionUtil.getMethod("hasKey", nbtTagCompound.getClass(), 1).invoke(nbtTagCompound, key);
+			return (Boolean) ReflectionUtil.getMethod("hasKey", nbtTagCompound.getClass(), 1).invoke(nbtTagCompound, key);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

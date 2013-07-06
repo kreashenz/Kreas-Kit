@@ -1,7 +1,7 @@
 main: me.kreashenz.kitpvp.KitPvP
 name: Kreas-Kit
-description: Kreas-Kit 2.0
-version: 2.0
+description: Kreas-Kit 2.2
+version: 2.2
 depend: [Vault]
 # Vault is used to give the players their money rewards. 
 commands:

@@ -1,9 +1,10 @@
 package me.kreashenz.kitpvp;
 
-import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import me.kreashenz.kitpvp.utils.Functions;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -12,7 +13,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -64,7 +64,7 @@ public class Kits implements CommandExecutor {
 						return false;
 					}
 					ArcherKit(p);
-				} else s.sendMessage("§cYou do not have permission to use this command.");
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("pvp")){
 				if(s.hasPermission("kitpvp.pvp")){
@@ -75,7 +75,7 @@ public class Kits implements CommandExecutor {
 						return false;
 					}
 					PvPKit(p);
-				} else s.sendMessage("§cYou do not have permission to use this command.");
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("tank")){
 				if(s.hasPermission("kitpvp.tank")){
@@ -86,7 +86,7 @@ public class Kits implements CommandExecutor {
 						return false;
 					}
 					TankKit(p);
-				} else s.sendMessage("§cYou do not have permission to use this command.");
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("pyro")){
 				if(s.hasPermission("kitpvp.pyro")){
@@ -97,7 +97,7 @@ public class Kits implements CommandExecutor {
 						return false;
 					}
 					PyroKit(p);
-				} else p.sendMessage("§cYou do not have permission to use this command.");
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("refill")){
 				if(s.hasPermission("kitpvp.refill")){
@@ -114,7 +114,7 @@ public class Kits implements CommandExecutor {
 						return true; 
 					}
 					return true;
-				} else s.sendMessage("§cYou do not have permission to use this command.");
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("medic")){
 				if(s.hasPermission("kitpvp.medic")){
@@ -125,7 +125,7 @@ public class Kits implements CommandExecutor {
 						return false;
 					}
 					MedicKit(p);
-				} else s.sendMessage("§cYou do not have permission to use this command.");
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("cupid")){
 				if(s.hasPermission("kitpvp.cupid")){
@@ -139,7 +139,7 @@ public class Kits implements CommandExecutor {
 						kit.addToCupidKit(p);
 					}
 					CupidKit(p);
-				} else s.sendMessage("§cYou do not have permission to use this command.");
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("assassin")){
 				assassin.add(p.getName());
@@ -147,14 +147,14 @@ public class Kits implements CommandExecutor {
 					if(!kit.hasAKit(p)){
 						kit.addToKitTracker(p);
 					} else {
-						s.sendMessage("§çYou must die before you use another kit");
+						s.sendMessage("§cYou must die before you use another kit");
 						return false;
 					}
 					AssassinKit(p);
-				}
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("kkit")){
-				if(args.length > 0){
+				if(args.length == 1){
 					if(s.hasPermission("kitpvp."+args[0].toLowerCase())){
 						if(!kit.hasAKit(p)){
 							kit.addToKitTracker(p);
@@ -162,31 +162,30 @@ public class Kits implements CommandExecutor {
 							p.sendMessage("§cYou must die before you use another kit.");
 						}
 						plugin.kits.giveKit(p, args[0].toLowerCase());
-					} else p.sendMessage("§cYou do not have permission to use this command.");
+					} else Functions.noPerm(p);
 				} else p.sendMessage("§cUsage : §f/kkit <kitName>");
 			}
 			if(cmd.getName().equalsIgnoreCase("stats")){
 				DecimalFormat d = new DecimalFormat("##.##");
 				if(s.hasPermission("kitpvp.stats")){
+					FileConfiguration file = plugin.getConfig();
 					if(args.length == 0){
-						FileConfiguration player = plugin.getConfig();
-						p.sendMessage("§7+§c--------------------------------------§c+");
-						p.sendMessage("§7|| §6KDR §1: §a" + d.format(player.getDouble("Kills") / player.getDouble("Deaths")));
-						p.sendMessage("§7|| §6Kills §1: §a" + player.getInt("Kills"));
-						p.sendMessage("§7|| §6Deaths §1: §a" + player.getInt("Deaths"));
-						p.sendMessage("§7+§c--------------------------------------§c+");
+						Functions.tell(p, "§7+§c--------------------------------------§c+");
+						Functions.tell(p, "§7|| §6KDR §1: §a" + d.format(file.getDouble(p.getName() + ".kills") / file.getDouble(p.getName() + ".deaths")));
+						Functions.tell(p, "§7|| §6Kills §1: §a" + file.getInt(p.getName() + ".kills"));
+						Functions.tell(p, "§7|| §6Deaths §1: §a" + file.getInt("deaths"));
+						Functions.tell(p, "§7+§c--------------------------------------§c+");
 					} else {
 						Player t = Bukkit.getPlayer(args[0]);
 						if(t.isOnline() && t != null){
-							FileConfiguration target = YamlConfiguration.loadConfiguration(new File("plugins/Kreas-Kit/users/" + t.getName().toLowerCase() + ".yml"));
-							p.sendMessage("§7+§c--------------------------------------§c+");
-							p.sendMessage("§7|| §6KDR §1: §a" + d.format(target.getDouble("Kills") / target.getDouble("Deaths")));
-							p.sendMessage("§7|| §6Kills §1: §a" + target.getInt("Kills"));
-							p.sendMessage("§7|| §6Deaths §1: §a" + target.getInt("Deaths"));
-							p.sendMessage("§7+§c--------------------------------------§c+");
+							Functions.tell(p, "§7+§c--------------------------------------§c+");
+							Functions.tell(p, "§7|| §6KDR §1: §a" + d.format(file.getDouble("kills") / file.getDouble("deaths")));
+							Functions.tell(p, "§7|| §6Kills §1: §a" + file.getInt("kills"));
+							Functions.tell(p, "§7|| §6Deaths §1: §a" + file.getInt("deaths"));
+							Functions.tell(p, "§7+§c--------------------------------------§c+");
 						} else p.sendMessage("§cThat player cannot be found, please try again.");
 					}
-				} else p.sendMessage("§cYou do not have permission to use this command.");
+				} else Functions.noPerm(p);
 			}
 		} else s.sendMessage("§cYou must be a player to use these commands.");
 

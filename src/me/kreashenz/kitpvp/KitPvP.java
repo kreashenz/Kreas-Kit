@@ -1,14 +1,18 @@
 package me.kreashenz.kitpvp;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.logging.Level;
 
 import me.kreashenz.kitpvp.metrics.Metrics;
+import me.kreashenz.kitpvp.utils.Functions;
 import net.milkbowl.vault.economy.Economy;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -26,20 +30,19 @@ public class KitPvP extends JavaPlugin {
 		kits = new KitManager(this);
 		kit = new Kits(this);
 
-		getServer().getPluginManager().registerEvents(new Events(this), this);
-		getServer().getPluginManager().registerEvents(new Signs(this), this);
+		listener(new Events(this));
+		listener(new Signs(this));
 
 		saveDefaultConfig();
 
-		getCommand("stats").setExecutor(kit);
-		getCommand("pyro").setExecutor(kit);
-		getCommand("tank").setExecutor(kit);
-		getCommand("pvp").setExecutor(kit);
-		getCommand("archer").setExecutor(kit);
-		getCommand("admin").setExecutor(kit);
-		getCommand("medic").setExecutor(kit);
-		getCommand("cupid").setExecutor(kit);
-		getCommand("refill").setExecutor(kit);
+		command("stats");
+		command("pyro");
+		command("tank");
+		command("pvp");
+		command("archer");
+		command("medic");
+		command("cupid");
+		command("refill");
 
 		setupVault(getServer().getPluginManager());
 
@@ -49,23 +52,58 @@ public class KitPvP extends JavaPlugin {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		checkForOldConfig();
+	}
 
-		if(!getConfig().contains("MustHaveKitToThrowTNT")){
-			File f = new File(getConfig().getName());
-			f.delete();
+	private void checkForOldConfig(){
+		if(getConfig().getDouble("version") != Double.valueOf(getDescription().getVersion())){
 
-			saveDefaultConfig();
+			try {
+				File old = new File(getDataFolder().getAbsolutePath() + File.separator + "config.yml.old");
+				File mew = new File(getDataFolder().getAbsolutePath() + File.separator + "config.yml");
+
+				InputStream in = new FileInputStream(mew);
+				OutputStream out = new FileOutputStream(old);
+
+				byte[] buff = new byte[1024];
+
+				int length;
+
+				while((length = in.read(buff)) > 0)out.write(buff, 0, length);
+
+				in.close();
+				out.close();
+
+				System.out.print(old.getAbsolutePath());
+				System.out.print(mew.getAbsolutePath());
+
+				mew.delete();
+
+				saveDefaultConfig();
+
+			} catch(IOException e){
+				e.printStackTrace();
+			}
 		}
+	}
+
+	private void command(String cmd){
+		getCommand(cmd).setExecutor(kit);
+	}
+
+	private void listener(Listener listener){
+		PluginManager pm = getServer().getPluginManager();
+		pm.registerEvents(listener, this);
 	}
 
 	private void setupVault(PluginManager pm) {
 		Plugin vault =  pm.getPlugin("Vault");
 		if (vault != null && vault instanceof net.milkbowl.vault.Vault) {
-			getLogger().info("Loaded Vault v" + vault.getDescription().getVersion());
+			Functions.log(Level.INFO, "Loaded Vault v" + vault.getDescription().getVersion());
 			if (!setupEconomy()) {
-				getLogger().warning("No economy plugin installed.");
+				Functions.log(Level.WARNING, "No economy plugin installed.");
 			} else {
-				getLogger().warning("Vault not loaded, please check your plugins folder or console.");
+				Functions.log(Level.WARNING, "Vault not loaded, please check your plugins folder or console.");
 			}
 		}
 	}
@@ -75,46 +113,10 @@ public class KitPvP extends JavaPlugin {
 		if (economyProvider != null) {
 			econ = economyProvider.getProvider();
 		} else {
-			getLogger().warning("Vault is not installed, can't give money for killstreaks. Disabling.");
+			Functions.log(Level.WARNING, "Vault is not installed, can't give money for killstreaks. Disabling.");
 			getServer().getPluginManager().disablePlugin(this);
 			return false;
 		}
 		return (econ != null);
-	}
-
-	public static void log(Level lvl, String msg){
-		Bukkit.getLogger().log(lvl, msg);
-	}
-
-	public int getStreaks(Player p){
-		return getConfig().getInt("killstreaks." + p.getName());
-	}
-
-	public void setStreaks(Player p, int Streaks){
-		getConfig().set("killstreaks." + p.getName(), Streaks);
-		saveConfig();
-	}
-
-	public void clearStreaks(Player p){
-		getConfig().set("killstreaks." + p.getName(), null);
-		saveConfig();
-	}
-
-	public void setKills(Player p, int kills){
-		getConfig().set(p.getName() + ".kills", kills);
-		saveConfig();
-	}
-
-	public void setDeaths(Player p, int deaths){
-		getConfig().set(p.getName() + ".deaths", deaths);
-		saveConfig();
-	}
-
-	public int getDeaths(Player p){
-		return getConfig().getInt(p.getName() + ".deaths");
-	}
-
-	public int getKills(Player p){
-		return getConfig().getInt(p.getName() + ".kills");
 	}
 }

@@ -3,6 +3,8 @@ package me.kreashenz.kitpvp;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.kreashenz.kitpvp.utils.KillstreakUtils;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -30,13 +32,13 @@ public class SBManager {
 		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
 		Score a = objective.getScore(Bukkit.getOfflinePlayer("§aKillstreak"));
-		a.setScore(plugin.getStreaks(p));
+		a.setScore(KillstreakUtils.getStreaks(p));
 
 		Score b = objective.getScore(Bukkit.getOfflinePlayer("§aKills"));
-		b.setScore(plugin.getKills(p));
+		b.setScore(KillstreakUtils.getKills(p));
 
 		Score c = objective.getScore(Bukkit.getOfflinePlayer("§aDeaths"));
-		c.setScore(plugin.getDeaths(p));
+		c.setScore(KillstreakUtils.getDeaths(p));
 
 		p.setScoreboard(board);
 

@@ -3,6 +3,8 @@ package me.kreashenz.kitpvp;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.kreashenz.kitpvp.utils.Functions;
+import me.kreashenz.kitpvp.utils.KillstreakUtils;
 import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.Bukkit;
@@ -58,23 +60,20 @@ public class Events implements Listener {
 			}
 			double perKill = plugin.getConfig().getDouble("Money-To-Give-Per-Kill");
 			EconomyResponse r = plugin.econ.depositPlayer(k.getName(), perKill);
-			if(r.transactionSuccess() && k!=null){
-				k.sendMessage("§6You have been rewarded with §a$" + perKill + "§6 for killing §a" + p.getName());
-			}
+			if(r.transactionSuccess() && k!=null)k.sendMessage("§6You have been rewarded with §a$" + perKill + "§6 for killing §a" + p.getName());
 
-			plugin.setStreaks(p, 0);
-			plugin.setStreaks(k, plugin.getStreaks(k) + 1);
+			KillstreakUtils.setStreaks(p, 0);
+			KillstreakUtils.setStreaks(k, KillstreakUtils.getStreaks(k) + 1);
 
-			k.sendMessage("§eYou now have killed §a" + plugin.getStreaks(k) + "§e player(s)!");
+			k.sendMessage("§eYou now have killed §a" + KillstreakUtils.getStreaks(k) + "§e player(s)!");
 
-			switch(plugin.getStreaks(k)){
+			switch(KillstreakUtils.getStreaks(k)){
 			case 3:
 				k.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
 				k.playSound(k.getLocation(), Sound.LEVEL_UP, 1, 1);
 				Bukkit.broadcastMessage("§a" + k.getName() + " §6has come up with a §a3 §6killstreak!");
 				EconomyResponse rf = plugin.econ.depositPlayer(k.getName(), plugin.getConfig().getInt("Money-To-Give-On-3-KillStreak"));
-				if (rf.transactionSuccess())
-					k.sendMessage("§6You have received §a$" + plugin.getConfig().getInt("Money-To-Give-On-3-KillStreak") + "§6 for killing §a" + p.getName());
+				if (rf.transactionSuccess())k.sendMessage("§6You have received §a$" + plugin.getConfig().getInt("Money-To-Give-On-3-KillStreak") + "§6 for killing §a" + p.getName());
 				break;
 			case 5:
 				k.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999999, 0));
@@ -149,7 +148,7 @@ public class Events implements Listener {
 				}
 				break;
 			}
-			if(plugin.getStreaks(k) > 20){
+			if(KillstreakUtils.getStreaks(k) > 20){
 				k.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20*20, 0));
 				k.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 20*20, 0));
 				k.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20*20, 0));
@@ -281,39 +280,39 @@ public class Events implements Listener {
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent e){
 		Player player = e.getPlayer();
-		plugin.setStreaks(player, 0);
+		KillstreakUtils.setStreaks(player, 0);
 	}
 
 	@EventHandler
 	public void onFeatherFly(PlayerInteractEvent e){
-		final Player player = e.getPlayer();
+		final Player p = e.getPlayer();
 		if(e.getAction() == Action.RIGHT_CLICK_AIR
 				||e.getAction() == Action.RIGHT_CLICK_BLOCK){
-			if(player.getItemInHand().getType() == Material.FEATHER){
-				if(!cooldown.contains(player.getName())){
-					if(player.getGameMode() == GameMode.CREATIVE){
-						player.sendMessage("§cYou are already in fly mode, silly :)");
+			if(p.getItemInHand().getType() == Material.FEATHER){
+				if(!cooldown.contains(p.getName())){
+					if(p.getGameMode() == GameMode.CREATIVE){
+						Functions.tell(p, "§cYou are already in fly mode, silly :)");
 					} else {
-						cooldown.add(player.getName());
-						player.setAllowFlight(true);
-						player.sendMessage("§aCupid fly mode, activated!");
+						cooldown.add(p.getName());
+						p.setAllowFlight(true);
+						Functions.tell(p, "§aCupid fly mode, activated!");
 					}
 					new BukkitRunnable(){
 						@Override
 						public void run(){
-							if(player.getGameMode() == GameMode.CREATIVE){
-								player.setAllowFlight(true);
+							if(p.getGameMode() == GameMode.CREATIVE){
+								p.setAllowFlight(true);
 							} else {
-								player.setAllowFlight(false);
-								player.sendMessage("§cYour arms are too sore to fly again, maybe sometime soon..");
+								p.setAllowFlight(false);
+								Functions.tell(p, "§cYour arms are too sore to fly again, maybe sometime soon..");
 							}
 						}
 					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Length-Cupid-Kit")*20);
 					new BukkitRunnable(){
 						@Override
 						public void run(){
-							cooldown.remove(player.getName());
-							player.sendMessage("§aYour arms are feeling good again.");
+							cooldown.remove(p.getName());
+							Functions.tell(p, "§aYour arms are feeling good again.");
 						}
 					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Cooldown-Cupid-Kit")*20);
 				}

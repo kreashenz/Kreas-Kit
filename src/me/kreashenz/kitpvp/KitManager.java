@@ -1,7 +1,6 @@
 package me.kreashenz.kitpvp;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -9,6 +8,7 @@ import java.util.logging.Level;
 import me.kreashenz.kitpvp.horse.HorseModifier;
 import me.kreashenz.kitpvp.horse.HorseType;
 import me.kreashenz.kitpvp.horse.HorseVariant;
+import me.kreashenz.kitpvp.utils.Functions;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -65,7 +65,7 @@ public class KitManager {
 		whoHasAKit.remove(p.getName());
 	}
 
-	@SuppressWarnings({"deprecation", "static-access"})
+	@SuppressWarnings("deprecation")
 	public void giveKit(Player p, String kit){
 		FileConfiguration a = plugin.getConfig();
 		int slot;
@@ -143,18 +143,22 @@ public class KitManager {
 			helmColour = Integer.parseInt(a.getString("Kits." + kit + ".helmetColour").replace("#", ""), 16);
 			lhelmet = setColour(lhelmet, helmColour);
 		}
+
 		if(a.contains("Kits." + kit + ".items.chestplateColour")){
 			chestColour = Integer.parseInt(a.getString("Kits." + kit + ".chestColour").replace("#", ""), 16);
 			lchestplate = setColour(lchestplate, chestColour);
 		}
+
 		if(a.contains("Kits." + kit + ".items.legsColour")){
 			legsColour = Integer.parseInt(a.getString("Kits." + kit + ".legsColour").replace("#", ""), 16);
 			lleggings = setColour(lleggings, legsColour);
 		}
+
 		if(a.contains("Kits." + kit + ".items.bootsColour")){
 			bootColour = Integer.parseInt(a.getString("Kits." + kit + ".bootsColour").replace("#", ""), 16);
 			lboots = setColour(lboots, bootColour);
 		}
+
 		if (helm != null) {
 			if (helm.equalsIgnoreCase("leather"))helmet = lhelmet;
 			if (helm.equalsIgnoreCase("iron"))helmet = ihelmet;
@@ -164,6 +168,7 @@ public class KitManager {
 			if (helm.equalsIgnoreCase("redwool"))helmet = new ItemStack(Material.WOOL, 1, (short)14);
 			if (helm.equalsIgnoreCase("bluewool"))helmet = new ItemStack(Material.WOOL, 1, (short)11);
 		}
+
 		if (chest != null) {
 			if (chest.equalsIgnoreCase("leather"))chestplate = lchestplate;
 			if (chest.equalsIgnoreCase("iron"))chestplate = ichestplate;
@@ -171,6 +176,7 @@ public class KitManager {
 			if (chest.equalsIgnoreCase("diamond"))chestplate = dchestplate;
 			if (chest.equalsIgnoreCase("chainmail"))chestplate = cchestplate;
 		}
+
 		if (legs != null) {
 			if (legs.equalsIgnoreCase("leather"))leggings = lleggings;
 			if (legs.equalsIgnoreCase("iron"))leggings = ileggings;
@@ -178,6 +184,7 @@ public class KitManager {
 			if (legs.equalsIgnoreCase("diamond"))leggings = dleggings;
 			if (legs.equalsIgnoreCase("chainmail"))leggings = cleggings;
 		}
+
 		if (boot != null) {
 			if (boot.equalsIgnoreCase("leather"))boots = lboots;
 			if (boot.equalsIgnoreCase("iron"))boots = iboots;
@@ -185,6 +192,7 @@ public class KitManager {
 			if (boot.equalsIgnoreCase("diamond"))boots = dboots;
 			if (boot.equalsIgnoreCase("chainmail"))boots = cboots;
 		}
+
 		short b = (short) a.getInt("Kits." + kit + ".items.helmetDurability");
 		short c = (short) a.getInt("Kits." + kit + ".items.chestplateDurability");
 		short d = (short) a.getInt("Kits." + kit + ".items.leggingsDurability");
@@ -197,6 +205,7 @@ public class KitManager {
 		if (chestplate != null) chestplate.setDurability(c);
 		if (leggings != null) leggings.setDurability(d);
 		if (boots != null) boots.setDurability(e);
+
 		if(a.contains("Kits." + kit + ".items.helmetEnchant") && helmet != null){
 			for(String ench : a.getString("Kits." + kit + ".items.helmetEnchant").split(" ")){
 				String[] enchant = ench.split(":");
@@ -205,6 +214,7 @@ public class KitManager {
 				helmet.addUnsafeEnchantment(enchNo, enchLvl);
 			}
 		}
+
 		if(a.contains("Kits." + kit + ".items.chestplateEnchant") && helmet != null){
 			for(String ench : a.getString("Kits." + kit + ".items.chestplateEnchant").split(" ")){
 				String[] enchant = ench.split(":");
@@ -213,6 +223,7 @@ public class KitManager {
 				chestplate.addUnsafeEnchantment(enchNo, enchLvl);
 			}
 		}
+
 		if(a.contains("Kits." + kit + ".items.leggingsEnchant") && helmet != null){
 			for(String ench : a.getString("Kits." + kit + ".items.leggingEnchant").split(" ")){
 				String[] enchant = ench.split(":");
@@ -221,6 +232,7 @@ public class KitManager {
 				leggings.addUnsafeEnchantment(enchNo, enchLvl);
 			}
 		}
+
 		if(a.contains("Kits." + kit + ".items.bootsEnchant") && helmet != null){
 			for(String ench : a.getString("Kits." + kit + ".items.bootsEnchant").split(" ")){
 				String[] enchant = ench.split(":");
@@ -244,27 +256,9 @@ public class KitManager {
 					int lvl = Integer.parseInt(pot[1]);
 					int duration = Integer.parseInt(pot[2])*20;
 					p.addPotionEffect(new PotionEffect(potEff, lvl, duration));
-				} catch (SecurityException e1) {
-					plugin.log(Level.SEVERE, "Error trying to get into the PotionEffectTypeWrapper class.");
-					plugin.log(Level.SEVERE, e1.getMessage());
-				} catch (NoSuchMethodException e1) {
-					plugin.log(Level.SEVERE, "Error trying to get into the PotionEffectTypeWrapper class. Method not found.");
-					plugin.log(Level.SEVERE, e1.getMessage());
-				} catch (NumberFormatException e1) {
-					plugin.log(Level.SEVERE, "I'm not giving the potion effect because we can't parse letters to numbers.");
-					plugin.log(Level.SEVERE, e1.getMessage());
-				} catch (IllegalArgumentException e1) {
-					plugin.log(Level.SEVERE, "I'm not giving the potion effect because something went wrong with syntax.");
-					plugin.log(Level.SEVERE, e1.getMessage());
-				} catch (InstantiationException e1) {
-					plugin.log(Level.SEVERE, "Can't instantiate this class.");
-					plugin.log(Level.SEVERE, e1.getMessage());
-				} catch (IllegalAccessException e1) {
-					plugin.log(Level.SEVERE, "Can't instantiate this class.");
-					plugin.log(Level.SEVERE, e1.getMessage());
-				} catch (InvocationTargetException e1) {
-					plugin.log(Level.SEVERE, "Can't instantiate this class.");
-					plugin.log(Level.SEVERE, e1.getMessage());
+				} catch (Exception e1){
+					Functions.log(Level.SEVERE, "Error trying to get into the 'PotionEffectTypeWrapper' class.");
+					e1.printStackTrace();
 				}
 			}
 		}
@@ -277,7 +271,7 @@ public class KitManager {
 					if(path.equalsIgnoreCase("iron"))horse.setArmorItem(new ItemStack(Material.IRON_BARDING));
 					else if(path.equalsIgnoreCase("gold"))horse.setArmorItem(new ItemStack(Material.GOLD_BARDING));
 					else if(path.equalsIgnoreCase("diamond"))horse.setArmorItem(new ItemStack(Material.DIAMOND_BARDING));
-					else KitPvP.log(Level.WARNING, "Tried setting armour to an invalid type, available types: Iron, Gold, Diamond.");
+					else Functions.log(Level.WARNING, "Tried setting armour to an invalid type, available types: Iron, Gold, Diamond.");
 				}
 				if(a.contains("Kits." + kit + ".forceRidingHorse") && a.getBoolean("Kits." + kit + ".forceRidingHorse") == true){
 					horse.setSaddled(true);
@@ -321,7 +315,7 @@ public class KitManager {
 					else if(path.equalsIgnoreCase("white_white"))horse.setVariant(HorseVariant.WHITE_WHITE);
 					else if(path.equalsIgnoreCase("white_white_dots"))horse.setVariant(HorseVariant.WHITE_WHITE_DOTS);
 					else if(path.equalsIgnoreCase("white_white_field"))horse.setVariant(HorseVariant.WHITE_WHITE_FIELD);
-					else KitPvP.log(Level.WARNING, "Tried setting the horse's colour to one not found.");
+					else Functions.log(Level.WARNING, "Tried setting the horse's colour to one not found.");
 				}
 				if(a.contains("Kits." + kit + ".horseType")){
 					String path = a.getString("Kits." + kit + ".horseType");
@@ -330,7 +324,7 @@ public class KitManager {
 					else if(path.equalsIgnoreCase("mule"))horse.setType(HorseType.MULE);
 					else if(path.equalsIgnoreCase("undead"))horse.setType(HorseType.UNDEAD);
 					else if(path.equalsIgnoreCase("skeletal"))horse.setType(HorseType.SKELETAL);
-					else KitPvP.log(Level.WARNING, "Tried setting the horse's type to one wasn't found.");
+					else Functions.log(Level.WARNING, "Tried setting the horse's type to one wasn't found.");
 				}
 			}
 		}

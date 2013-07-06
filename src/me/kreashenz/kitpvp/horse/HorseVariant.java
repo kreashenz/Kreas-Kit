@@ -5,6 +5,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public enum HorseVariant {
+
+	/*
+	 * Thanks to
+	 * @author DarkBladee12 for doing this!
+	 */
+
 	WHITE("white", 0),
 	CREAMY("creamy", 1),
 	CHESTNUT("chestnut", 2),
