@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import me.kreashenz.kitpvp.horse.HorseModifier;
+import me.kreashenz.kitpvp.horse.HorseType;
+import me.kreashenz.kitpvp.horse.HorseVariant;
+
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -261,6 +265,72 @@ public class KitManager {
 				} catch (InvocationTargetException e1) {
 					plugin.log(Level.SEVERE, "Can't instantiate this class.");
 					plugin.log(Level.SEVERE, e1.getMessage());
+				}
+			}
+		}
+
+		if(a.contains("Kits." + kit + ".spawnHorse")){
+			if(a.getBoolean("Kits." + kit + ".spawnHorse") == true){
+				HorseModifier horse = HorseModifier.spawn(p.getLocation());
+				if(a.contains("Kits." + kit + ".horseArmour")){
+					String path = a.getString("Kits." + kit + ".horseArmour");
+					if(path.equalsIgnoreCase("iron"))horse.setArmorItem(new ItemStack(Material.IRON_BARDING));
+					else if(path.equalsIgnoreCase("gold"))horse.setArmorItem(new ItemStack(Material.GOLD_BARDING));
+					else if(path.equalsIgnoreCase("diamond"))horse.setArmorItem(new ItemStack(Material.DIAMOND_BARDING));
+					else KitPvP.log(Level.WARNING, "Tried setting armour to an invalid type, available types: Iron, Gold, Diamond.");
+				}
+				if(a.contains("Kits." + kit + ".forceRidingHorse") && a.getBoolean("Kits." + kit + ".forceRidingHorse") == true){
+					horse.setSaddled(true);
+					horse.getHorse().setPassenger(p);
+				}
+				if(a.contains("Kits." + kit + ".horseColour")){
+					String path = a.getString("Kits." + kit + ".horseColour");
+					if(path.equalsIgnoreCase("black"))horse.setVariant(HorseVariant.BLACK);
+					else if(path.equalsIgnoreCase("black_black_dots"))horse.setVariant(HorseVariant.BLACK_BLACK_DOTS);
+					else if(path.equalsIgnoreCase("black_white"))horse.setVariant(HorseVariant.BLACK_WHITE);
+					else if(path.equalsIgnoreCase("black_white_dots"))horse.setVariant(HorseVariant.BLACK_WHITE_DOTS);
+					else if(path.equalsIgnoreCase("black_white_field"))horse.setVariant(HorseVariant.BLACK_WHITE_FIELD);
+					else if(path.equalsIgnoreCase("brown"))horse.setVariant(HorseVariant.BROWN);
+					else if(path.equalsIgnoreCase("brown_black_dots"))horse.setVariant(HorseVariant.BROWN_BLACK_DOTS);
+					else if(path.equalsIgnoreCase("brown_white"))horse.setVariant(HorseVariant.BROWN_WHITE);
+					else if(path.equalsIgnoreCase("brown_white_dots"))horse.setVariant(HorseVariant.BROWN_WHITE_DOTS);
+					else if(path.equalsIgnoreCase("brown_white_field"))horse.setVariant(HorseVariant.BROWN_WHITE_FIELD);
+					else if(path.equalsIgnoreCase("chestnut"))horse.setVariant(HorseVariant.CHESTNUT);
+					else if(path.equalsIgnoreCase("chestnut_black_dots"))horse.setVariant(HorseVariant.CHESTNUT_BLACK_DOTS);
+					else if(path.equalsIgnoreCase("chestnut_white"))horse.setVariant(HorseVariant.CHESTNUT_WHITE);
+					else if(path.equalsIgnoreCase("chestnut_white_dots"))horse.setVariant(HorseVariant.CHESTNUT_WHITE_DOTS);
+					else if(path.equalsIgnoreCase("chestnut_white_field"))horse.setVariant(HorseVariant.CHESTNUT_WHITE_FIELD);
+					else if(path.equalsIgnoreCase("creamy"))horse.setVariant(HorseVariant.CREAMY);
+					else if(path.equalsIgnoreCase("creamy_black_dots"))horse.setVariant(HorseVariant.CREAMY_BLACK_DOTS);
+					else if(path.equalsIgnoreCase("creamy_white"))horse.setVariant(HorseVariant.CREAMY_WHITE);
+					else if(path.equalsIgnoreCase("creamy_white_dots"))horse.setVariant(HorseVariant.CREAMY_WHITE_DOTS);
+					else if(path.equalsIgnoreCase("creamy_white_field"))horse.setVariant(HorseVariant.CREAMY_WHITE_FIELD);
+					else if(path.equalsIgnoreCase("dark_brown"))horse.setVariant(HorseVariant.DARK_BROWN);
+					else if(path.equalsIgnoreCase("dark_brown_black_dots"))horse.setVariant(HorseVariant.DARK_BROWN_BLACK_DOTS);
+					else if(path.equalsIgnoreCase("dark_brown_white"))horse.setVariant(HorseVariant.DARK_BROWN_WHITE);
+					else if(path.equalsIgnoreCase("dark_brown_white_dots"))horse.setVariant(HorseVariant.DARK_BROWN_WHITE_DOTS);
+					else if(path.equalsIgnoreCase("dark_brown_white_field"))horse.setVariant(HorseVariant.DARK_BROWN_WHITE_FIELD);
+					else if(path.equalsIgnoreCase("gray"))horse.setVariant(HorseVariant.GRAY);
+					else if(path.equalsIgnoreCase("gray_black_dots"))horse.setVariant(HorseVariant.GRAY_BLACK_DOTS);
+					else if(path.equalsIgnoreCase("gray_white"))horse.setVariant(HorseVariant.GRAY_WHITE);
+					else if(path.equalsIgnoreCase("gray_white_dots"))horse.setVariant(HorseVariant.GRAY_WHITE_DOTS);
+					else if(path.equalsIgnoreCase("gray_white_field"))horse.setVariant(HorseVariant.GRAY_WHITE_FIELD);
+					else if(path.equalsIgnoreCase("invisible"))horse.setVariant(HorseVariant.INVISIBLE);
+					else if(path.equalsIgnoreCase("white"))horse.setVariant(HorseVariant.WHITE);
+					else if(path.equalsIgnoreCase("white_black_dots"))horse.setVariant(HorseVariant.WHITE_BLACK_DOTS);
+					else if(path.equalsIgnoreCase("white_white"))horse.setVariant(HorseVariant.WHITE_WHITE);
+					else if(path.equalsIgnoreCase("white_white_dots"))horse.setVariant(HorseVariant.WHITE_WHITE_DOTS);
+					else if(path.equalsIgnoreCase("white_white_field"))horse.setVariant(HorseVariant.WHITE_WHITE_FIELD);
+					else KitPvP.log(Level.WARNING, "Tried setting the horse's colour to one not found.");
+				}
+				if(a.contains("Kits." + kit + ".horseType")){
+					String path = a.getString("Kits." + kit + ".horseType");
+					if(path.equalsIgnoreCase("horse"))horse.setType(HorseType.NORMAL);
+					else if(path.equalsIgnoreCase("donkey"))horse.setType(HorseType.DONKEY);
+					else if(path.equalsIgnoreCase("mule"))horse.setType(HorseType.MULE);
+					else if(path.equalsIgnoreCase("undead"))horse.setType(HorseType.UNDEAD);
+					else if(path.equalsIgnoreCase("skeletal"))horse.setType(HorseType.SKELETAL);
+					else KitPvP.log(Level.WARNING, "Tried setting the horse's type to one wasn't found.");
 				}
 			}
 		}

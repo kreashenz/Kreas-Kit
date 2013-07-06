@@ -49,6 +49,10 @@ Kits:
 #      chestplateEnchant: '0:1'
 #      leggingsEnchant: '0:1'
 #      bootsEnchant: '0:1'
+#      spawnHorse: true
+#      forceRidingHorse: true
+#      horseColour: black_white_dots
+#      horseType: horse
     
 Money-To-Give-Per-Kill: 10
 Money-To-Give-On-3-KillStreak: 30
