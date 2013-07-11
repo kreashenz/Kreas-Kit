@@ -6,10 +6,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import me.kreashenz.kitpvp.metrics.Metrics;
 import me.kreashenz.kitpvp.utils.Functions;
+import me.kreashenz.kitpvp.utils.KillstreakUtils;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.event.Listener;
@@ -20,20 +25,42 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class KitPvP extends JavaPlugin {
 
+	private ScheduledExecutorService service = null;
+	private ScheduledFuture<?> i = null;
+
 	public KitManager kits;
 	public Economy econ = null;
-	private Kits kit;
+	public Kits kit;
+	public SBManager sb;
 
 	@Override
 	public void onEnable() {
 
+		String path = getDataFolder().getAbsolutePath() + File.separator + "stats.yml";
+
+		File file = new File(path);
+
+		if(!new File(getDataFolder().getAbsolutePath() + File.separator + "README-Update.txt").exists()){
+			saveResource("README-Update.txt", false);
+		}
+
+		if(!(file.exists())){
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+				Functions.log(Level.SEVERE, "Couldn't create the stats.yml file.");
+			}
+		}
+
+		saveDefaultConfig();
+
 		kits = new KitManager(this);
 		kit = new Kits(this);
+		sb = new SBManager(this);
 
 		listener(new Events(this));
 		listener(new Signs(this));
-
-		saveDefaultConfig();
 
 		command("stats");
 		command("pyro");
@@ -43,6 +70,8 @@ public class KitPvP extends JavaPlugin {
 		command("medic");
 		command("cupid");
 		command("refill");
+		command("kkit");
+		command("assassin");
 
 		setupVault(getServer().getPluginManager());
 
@@ -52,7 +81,10 @@ public class KitPvP extends JavaPlugin {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		checkForOldConfig();
+
+		runStatsSaveTimer();
 	}
 
 	private void checkForOldConfig(){
@@ -73,9 +105,6 @@ public class KitPvP extends JavaPlugin {
 
 				in.close();
 				out.close();
-
-				System.out.print(old.getAbsolutePath());
-				System.out.print(mew.getAbsolutePath());
 
 				mew.delete();
 
@@ -103,8 +132,10 @@ public class KitPvP extends JavaPlugin {
 			if (!setupEconomy()) {
 				Functions.log(Level.WARNING, "No economy plugin installed.");
 			} else {
-				Functions.log(Level.WARNING, "Vault not loaded, please check your plugins folder or console.");
+				Functions.log(Level.INFO, "Found economy.");
 			}
+		} else {
+			Functions.log(Level.WARNING, "Vault not loaded, please check your plugins folder or console.");
 		}
 	}
 
@@ -119,4 +150,19 @@ public class KitPvP extends JavaPlugin {
 		}
 		return (econ != null);
 	}
+
+	private void runStatsSaveTimer(){
+		service = Executors.newScheduledThreadPool(1);
+		i = service.scheduleAtFixedRate(new Runnable(){
+			public void run(){
+				new KillstreakUtils(new KitPvP()).save();
+			}
+		}, 0L, getConfig().getInt("config-save-delay"), TimeUnit.SECONDS);
+	}
+
+	public void cancel(){
+		service.shutdown();
+		i.cancel(true);
+	}
+
 }

@@ -1,10 +1,16 @@
 main: me.kreashenz.kitpvp.KitPvP
 name: Kreas-Kit
-description: Kreas-Kit 2.2
+description: Kreas-Kit 2.2 The ultimate kit plugin.
 version: 2.2
 depend: [Vault]
 # Vault is used to give the players their money rewards. 
 commands:
+  assassin:
+    description: Choose the assassin kit.
+    default: true
+  kkit:
+    description: Choose a custom kit from Kreas-Kits.
+    default: true
   archer:
     description: Choose the archer kit.
     default: true
@@ -14,10 +20,6 @@ commands:
   pyro:
     description: Choose the pyro kit.
     default: true
-  admin:
-    description: Talk in admin chat.
-    default: op
-    aliases: [a, adminchat]
   tank:
     description: Choose the tank kit.
     default: true

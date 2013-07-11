@@ -1,5 +1,22 @@
 version: 2.2 # Don't edit this, it will cause Kreas-Kits to break!
 
+config-save-delay: 60
+
+messages:
+  killer-message-on-streak: '&You have a &a%streak% &6killstreak!'
+  killer-message-per-kill: '&aYou got &6%amount% &afor killing &6%p&a!'
+  broadcast-3-killstreak: '&a%p &6is on a &a3 &6killstreak!'
+  broadcast-5-killstreak: '&a%p &6is on a &a5 &6killstreak!'
+  broadcast-7-killstreak: '&a%p &6is on a &a7 &6killstreak!'
+  broadcast-10-killstreak: '&a%p &6is on a &a10 &6killstreak!'
+  broadcast-15-killstreak: '&a%p &6is on a &a15 &6killstreak!'
+  broadcast-20-killstreak: '&a%p &6is on a &a20 &6killstreak!'
+  new-kit-permission: '&aYou can now use another kit!'
+  
+  cupid-feather-use: '&aYou have used the Cupid flight ability!'
+  cupid-feather-end: '&cYour arms are too tired to fly again, wait!'
+  cupid-feather-canUse: '&aYou can now use Cupid flight ability again!'
+
 allow:
   itemdropping: false
   dropsOnDeath: false
@@ -49,7 +66,7 @@ Kits:
       35: '0'
 #      helmetEnchant: '0:1'
 #      chestplateEnchant: '0:1'
-#      leggingsEnchant: '0:1'
+#      leggingEnchant: '0:1'
 #      bootsEnchant: '0:1'
 #      spawnHorse: true
 #      forceRidingHorse: true

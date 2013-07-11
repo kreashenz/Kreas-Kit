@@ -1,5 +1,7 @@
 package me.kreashenz.kitpvp;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +16,10 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.entity.TNTPrimed;
@@ -31,18 +35,21 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.potion.PotionEffect;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class Events implements Listener {
 
 	private KitPvP plugin;
+	private KillstreakUtils streakUtils;
+
 	public Events(KitPvP plugin){
-		this.plugin=plugin;
+		this.plugin = plugin;
+		this.streakUtils = new KillstreakUtils(plugin);
 	}
 
 	private List<String> cooldown = new ArrayList<String>();
@@ -52,143 +59,145 @@ public class Events implements Listener {
 		if(e.getEntity() instanceof Player && e.getEntity().getKiller() instanceof Player){
 			Player p = e.getEntity();
 			Player k = p.getKiller();
-			if (plugin.kits.hasAKit(p)){
-				plugin.kits.takeFromKitTracker(p);
+
+			checkStreak(k);
+
+			if (plugin.kits.whoHasAKit.contains(p.getName())){
+				Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.new-kit-permission")));
+				plugin.kits.whoHasAKit.remove(p.getName());
 			}
-			if (plugin.kits.hasCupidKit(p)){
-				plugin.kits.takeFromCupitKit(p);
+
+			if (plugin.kits.isInCupidKit.contains(p.getName())){
+				plugin.kits.isInCupidKit.remove(p.getName());
 			}
+
 			double perKill = plugin.getConfig().getDouble("Money-To-Give-Per-Kill");
 			EconomyResponse r = plugin.econ.depositPlayer(k.getName(), perKill);
-			if(r.transactionSuccess() && k!=null)k.sendMessage("§6You have been rewarded with §a$" + perKill + "§6 for killing §a" + p.getName());
+			if(r.transactionSuccess() && k!=null)Functions.tell(k, Functions.format(plugin.getConfig().getString("messages.killer-message-per-kill").replace("%p", p.getName()).replace("%amount%", "" + r.amount)));
 
-			KillstreakUtils.setStreaks(p, 0);
-			KillstreakUtils.setStreaks(k, KillstreakUtils.getStreaks(k) + 1);
+			streakUtils.setStreaks(p, 0);
+			streakUtils.setStreaks(k, streakUtils.getStreaks(k) + 1);
 
-			k.sendMessage("§eYou now have killed §a" + KillstreakUtils.getStreaks(k) + "§e player(s)!");
+			Functions.tell(k, Functions.format(plugin.getConfig().getString("messages.killer-message-on-streak").replace("%streak%", "" + streakUtils.getStreaks(p))));
 
-			switch(KillstreakUtils.getStreaks(k)){
-			case 3:
-				k.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
-				k.playSound(k.getLocation(), Sound.LEVEL_UP, 1, 1);
-				Bukkit.broadcastMessage("§a" + k.getName() + " §6has come up with a §a3 §6killstreak!");
-				EconomyResponse rf = plugin.econ.depositPlayer(k.getName(), plugin.getConfig().getInt("Money-To-Give-On-3-KillStreak"));
-				if (rf.transactionSuccess())k.sendMessage("§6You have received §a$" + plugin.getConfig().getInt("Money-To-Give-On-3-KillStreak") + "§6 for killing §a" + p.getName());
-				break;
-			case 5:
-				k.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999999, 0));
-				k.playSound(k.getLocation(), Sound.LEVEL_UP, 1, 1);
-				Bukkit.broadcastMessage("§a" + k.getName() + " §6is on a §a5§6 killstreak, so watch out!");
-				EconomyResponse ra = plugin.econ.depositPlayer(k.getName(), plugin.getConfig().getInt("Money-To-Give-On-5-KillStreak"));
-				if (ra.transactionSuccess())
-					k.sendMessage("§6You have received §a$" + plugin.getConfig().getInt("Money-To-Give-On-5-KillStreak") + "§6 for killing §a" + p.getName());
-				break;
-			case 7:
-				ItemStack a = new ItemStack(Material.SNOW_BALL, 3);
-				ItemMeta aa = a.getItemMeta();
-				aa.setDisplayName("§rGrenade");
-				a.setItemMeta(aa);
-				k.getInventory().addItem(a);
-				k.playSound(k.getLocation(), Sound.LEVEL_UP, 1, 1);
-				k.sendMessage("§aEnjoy your rewards, use them wisely, though.");
-				Bukkit.broadcastMessage("§a" + k.getName() + " §6is on a killer §a7§6 killstreak, watch out!");
-				EconomyResponse rb = plugin.econ.depositPlayer(k.getName(), plugin.getConfig().getInt("Money-To-Give-On-7-KillStreak"));
-				if (rb.transactionSuccess())
-					k.sendMessage("§6You have recieved §a$" + plugin.getConfig().getInt("Money-To-Give-On-7-KillStreak") + "§6 for killing §a" + p.getName());
-				break;
-			case 10:
-				ItemStack helm = k.getInventory().getHelmet();
-				ItemStack chest = k.getInventory().getChestplate();
-				ItemStack legs = k.getInventory().getLeggings();
-				ItemStack boots = k.getInventory().getBoots();
-				helm.setDurability(helm.getType().getMaxDurability());
-				chest.setDurability(chest.getType().getMaxDurability());
-				legs.setDurability(legs.getType().getMaxDurability());
-				boots.setDurability(boots.getType().getMaxDurability());
-				k.getInventory().setHelmet(helm);
-				k.getInventory().setChestplate(chest);
-				k.getInventory().setLeggings(legs);
-				k.getInventory().setBoots(boots);
-				k.sendMessage("§6You are on a great 10 kill streak!! Keep going! You have been rewarded by having your §aarmour fixed§6, and §ahaste §aadded!");
-				k.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 999999999, 0));
-				k.playSound(k.getLocation(), Sound.LEVEL_UP, 1, 1);
-				Bukkit.broadcastMessage("§a" + k.getName() + " §6is on an epic 10 killstreak! Keep him out of your way, or you might get mauled!");
-				EconomyResponse rc = plugin.econ.depositPlayer(k.getName(), plugin.getConfig().getInt("Money-To-Give-On-10-KillStreak"));
-				if (rc.transactionSuccess())
-					k.sendMessage("§6You have recieved §a$" + plugin.getConfig().getInt("Money-To-Give-On-10-KillStreak") + "§6 for killing §a" + p.getName());
-				break;
-			case 15:
-				k.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20*20, 0));
-				k.playSound(k.getLocation(), Sound.LEVEL_UP, 1, 1);
-				Bukkit.broadcastMessage("§a" + k.getName() + " §6is on a §aMASSACRE§6!! Stay the hell outta his way!");
-				EconomyResponse rd = plugin.econ.depositPlayer(k.getName(), plugin.getConfig().getInt("Money-To-Give-On-15-KillStreak"));
-				if (rd.transactionSuccess())
-					k.sendMessage("§6You have recieved §a$" + plugin.getConfig().getInt("Money-To-Give-On-15-KillStreak") + "§6 for killing §a" + p.getName());
-				break;
-			case 20:
-				if(plugin.kits.hasAKit(k)){
-					plugin.kits.takeFromKitTracker(k);
-					k.getInventory().addItem(new ItemStack(Material.EGG, 5));
-					k.sendMessage("§aYou have permission to you a new kit!");
-					k.sendMessage("§6You have been given some §aFire Grenades§6!");
-					k.playSound(k.getLocation(), Sound.LEVEL_UP, 1, 1);
-					EconomyResponse re = plugin.econ.depositPlayer(k.getName(), plugin.getConfig().getInt("Money-To-Give-On-20-KillStreak"));
-					if (re.transactionSuccess())
-						k.sendMessage("§6You have recieved §a$" + plugin.getConfig().getInt("Money-To-Give-On-20-KillStreak") + "§6 for killing §a" + p.getName());
-				}
-				break;
+			if(plugin.getConfig().getBoolean("allow.dropsOnDeath") == false){
+				e.setDroppedExp(0);
+				e.getDrops().clear();
 			}
-			if(KillstreakUtils.getStreaks(k) > 20){
-				k.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*20, 0));
-				k.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20*20, 0));
-				k.playSound(k.getLocation(), Sound.LEVEL_UP, 1, 1);
-			}
+
 		}
 	}
 
-	@EventHandler
-	public void PlayerDropItemsOnDeath(PlayerDeathEvent e){
-		if(!plugin.getConfig().getBoolean("allow.dropsOnDeath")){
-			e.setDroppedExp(0);
-			e.getDrops().clear();
-		}
-		if(e.getEntity() instanceof Player){
-			if(plugin.kits.hasAKit(e.getEntity())){
-				plugin.kits.whoHasAKit.remove(e.getEntity().getName());
-				e.getEntity().sendMessage("§aYou can now use another kit.");
+	private void checkStreak(Player p){
+		PlayerInventory pi = p.getInventory();
+		switch(streakUtils.getStreaks(p)){
+		case 3:
+			Functions.givePot(p, PotionEffectType.SPEED, 600, 0);
+			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-3-killstreak").replace("%p", p.getName())));
+			EconomyResponse rf = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-3-KillStreak"));
+			if (rf.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-3-killstreak").replace("%amount%", "" + rf.amount).replace("%p", p.getName())));
+		case 5:
+			Functions.givePot(p, PotionEffectType.INCREASE_DAMAGE, 600, 0);
+			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-5-killstreak").replace("%p", p.getName())));
+			EconomyResponse ra = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-5-KillStreak"));
+			if (ra.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-5-killstreak").replace("%amount%", "" + ra.amount).replace("%p", p.getName())));
+		case 7:
+			ItemStack a = new ItemStack(Material.SNOW_BALL, 3);
+			Functions.name(a, "§cGrenade");
+			pi.addItem(a);
+			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+			Functions.tell(p, "§aEnjoy your rewards, use them wisely, though.");
+			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-7-killstreak").replace("%p", p.getName())));
+			EconomyResponse rb = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-7-KillStreak"));
+			if (rb.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-7-killstreak").replace("%amount%", "" + rb.amount).replace("%p", p.getName())));
+		case 10:
+			ItemStack helm = pi.getHelmet();
+			ItemStack chest = pi.getChestplate();
+			ItemStack legs = pi.getLeggings();
+			ItemStack boots = pi.getBoots();
+			helm.setDurability(helm.getType().getMaxDurability());
+			chest.setDurability(chest.getType().getMaxDurability());
+			legs.setDurability(legs.getType().getMaxDurability());
+			boots.setDurability(boots.getType().getMaxDurability());
+			pi.setArmorContents(new ItemStack[] {helm, chest, legs, boots});
+
+			Functions.tell(p, plugin.getConfig().getString("messages.reward-message-10-streak"));
+
+			Functions.givePot(p, PotionEffectType.FAST_DIGGING, 600, 0);
+			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+
+			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-10-killstreak").replace("%p", p.getName())));
+
+			EconomyResponse rc = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-10-KillStreak"));
+			if (rc.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-10-killstreak").replace("%amount%", "" + rc.amount).replace("%p", p.getName())));
+
+		case 15:
+			Functions.givePot(p, PotionEffectType.DAMAGE_RESISTANCE, 20, 0);
+			Functions.givePot(p, PotionEffectType.FAST_DIGGING, 20, 0);
+			Functions.givePot(p, PotionEffectType.FIRE_RESISTANCE, 20, 0);
+			Functions.givePot(p, PotionEffectType.HEAL, 20, 0);
+			Functions.givePot(p, PotionEffectType.INCREASE_DAMAGE, 20, 0);
+			Functions.givePot(p, PotionEffectType.INVISIBILITY, 20, 0);
+			Functions.givePot(p, PotionEffectType.JUMP, 20, 0);
+			Functions.givePot(p, PotionEffectType.NIGHT_VISION, 20, 0);
+			Functions.givePot(p, PotionEffectType.REGENERATION, 20, 0);
+			Functions.givePot(p, PotionEffectType.SPEED, 20, 0);
+			Functions.givePot(p, PotionEffectType.WATER_BREATHING, 20, 0);
+			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+
+			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-15-killstreak").replace("%p", p.getName())));
+
+			EconomyResponse rd = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-15-KillStreak"));
+			if (rd.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-15-killstreak").replace("%amount%", "" + rd.amount).replace("%p", p.getName())));
+			break;
+		case 20:
+			if(plugin.kits.hasAKit(p)){
+				plugin.kits.takeFromKitTracker(p);
+
+				pi.addItem(new ItemStack(Material.EGG, 5));
+				Functions.tell(p, "§6You have been given some §aFire Grenades§6!");
+
+				Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.new-kit-permission")));
+
+				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+
+				Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-20-killstreak").replace("%p", p.getName())));
+
+				EconomyResponse re = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-20-KillStreak"));
+				if (re.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-20-killstreak").replace("%amount%", "" + re.amount).replace("%p", p.getName())));
 			}
+		}
+		if(streakUtils.getStreaks(p) > 20){
+			Functions.givePot(p, PotionEffectType.DAMAGE_RESISTANCE, 20, 0);
+			Functions.givePot(p, PotionEffectType.FAST_DIGGING, 20, 0);
+			Functions.givePot(p, PotionEffectType.FIRE_RESISTANCE, 20, 0);
+			Functions.givePot(p, PotionEffectType.HEAL, 20, 0);
+			Functions.givePot(p, PotionEffectType.INCREASE_DAMAGE, 20, 0);
+			Functions.givePot(p, PotionEffectType.INVISIBILITY, 20, 0);
+			Functions.givePot(p, PotionEffectType.JUMP, 20, 0);
+			Functions.givePot(p, PotionEffectType.NIGHT_VISION, 20, 0);
+			Functions.givePot(p, PotionEffectType.REGENERATION, 20, 0);
+			Functions.givePot(p, PotionEffectType.SPEED, 20, 0);
+			Functions.givePot(p, PotionEffectType.WATER_BREATHING, 20, 0);
+			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
 		}
 	}
 
 	@EventHandler
 	public void PlayerJoin(PlayerJoinEvent e){
 		Player p = e.getPlayer();
-		FileConfiguration a = plugin.getConfig();
+		FileConfiguration a = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "stats.yml"));
 		if(!a.contains(p.getName() + ".kills")){
 			a.set(p.getName() + ".kills", "0");
 			a.set(p.getName() + ".deaths", "0");
 			a.set(p.getName() + ".KDR", "0");
-			a.set(p.getName() + ".killstreaks", "0");
-			plugin.saveConfig();
+			try {
+				a.save(new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "stats.yml"));
+			} catch (IOException e1){
+				e1.printStackTrace();
+			}
 		}
 	}
 
@@ -280,7 +289,7 @@ public class Events implements Listener {
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent e){
 		Player player = e.getPlayer();
-		KillstreakUtils.setStreaks(player, 0);
+		streakUtils.setStreaks(player, 0);
 	}
 
 	@EventHandler
@@ -295,7 +304,7 @@ public class Events implements Listener {
 					} else {
 						cooldown.add(p.getName());
 						p.setAllowFlight(true);
-						Functions.tell(p, "§aCupid fly mode, activated!");
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-use")));
 					}
 					new BukkitRunnable(){
 						@Override
@@ -304,7 +313,7 @@ public class Events implements Listener {
 								p.setAllowFlight(true);
 							} else {
 								p.setAllowFlight(false);
-								Functions.tell(p, "§cYour arms are too sore to fly again, maybe sometime soon..");
+								Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-end")));
 							}
 						}
 					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Length-Cupid-Kit")*20);
@@ -312,7 +321,7 @@ public class Events implements Listener {
 						@Override
 						public void run(){
 							cooldown.remove(p.getName());
-							Functions.tell(p, "§aYour arms are feeling good again.");
+							Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-canUse")));
 						}
 					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Cooldown-Cupid-Kit")*20);
 				}
@@ -329,6 +338,29 @@ public class Events implements Listener {
 					e.setCancelled(true);
 				} else {
 					e.setCancelled(false);
+				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void onAssassinDisappear(PlayerMoveEvent e){
+		Player p = e.getPlayer();
+		for(Player ps : Bukkit.getOnlinePlayers()){
+			if(plugin.kit.assassin.contains(p.getName())){
+				if (!p.canSee(ps))
+				{
+					p.hidePlayer(ps);
+				}
+			}
+		}
+		for(Entity ents : p.getNearbyEntities(13, 13, 13)){
+			if(ents instanceof LivingEntity && ents instanceof Player){
+				Player ps = (Player)ents;
+
+				if (!p.canSee(ps))
+				{
+					p.hidePlayer(ps);
 				}
 			}
 		}
