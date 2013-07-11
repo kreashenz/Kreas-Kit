@@ -72,6 +72,7 @@ public class KitPvP extends JavaPlugin {
 		command("refill");
 		command("kkit");
 		command("assassin");
+		command("knight");
 
 		setupVault(getServer().getPluginManager());
 

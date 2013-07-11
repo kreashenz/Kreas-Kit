@@ -12,8 +12,6 @@ import org.bukkit.potion.PotionEffectType;
 
 public class Functions {
 
-	private static String noPerm = "§cYou don't have permission.";
-
 	public static void log(Level level, String msg){
 		Bukkit.getLogger().log(level, "[Kreas-Kits] " + msg);
 	}
@@ -27,7 +25,7 @@ public class Functions {
 	}
 
 	public static void noPerm(Player p){
-		tell(p, noPerm);
+		tell(p, "§cYou don't have permission.");
 	}
 
 	public static ItemStack name(ItemStack item, String name){

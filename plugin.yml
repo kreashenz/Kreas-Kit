@@ -35,3 +35,6 @@ commands:
   cupid:
     description: Choose the cupid kit.
     default: true
+  knight:
+    description: Choose the knight kit.
+    default: true

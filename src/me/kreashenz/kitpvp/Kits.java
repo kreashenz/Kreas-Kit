@@ -14,7 +14,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Horse.Variant;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.HorseInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -41,7 +44,7 @@ public class Kits implements CommandExecutor {
 						plugin.kits.addToKitTracker(p);
 						ArcherKit(p);
 					} else {
-						Functions.tell(p, "§cYou must die before you use another kit.");
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 					}
 				} else Functions.noPerm(p);
 			}
@@ -51,7 +54,7 @@ public class Kits implements CommandExecutor {
 						plugin.kits.addToKitTracker(p);
 						PvPKit(p);
 					} else {
-						Functions.tell(p, "§cYou must die before you use another kit.");
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 					}
 				} else Functions.noPerm(p);
 			}
@@ -61,7 +64,7 @@ public class Kits implements CommandExecutor {
 						plugin.kits.addToKitTracker(p);
 						TankKit(p);
 					} else {
-						Functions.tell(p, "§cYou must die before you use another kit.");
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 					}
 				} else Functions.noPerm(p);
 			}
@@ -71,7 +74,7 @@ public class Kits implements CommandExecutor {
 						plugin.kits.addToKitTracker(p);
 						PyroKit(p);
 					} else {
-						Functions.tell(p, "§cYou must die before you use another kit.");
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 					}
 				} else Functions.noPerm(p);
 			}
@@ -98,7 +101,7 @@ public class Kits implements CommandExecutor {
 						plugin.kits.addToKitTracker(p);
 						MedicKit(p);
 					} else {
-						Functions.tell(p, "§cYou must die before you use another kit.");
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 					}
 				} else Functions.noPerm(p);
 			}
@@ -108,8 +111,7 @@ public class Kits implements CommandExecutor {
 						plugin.kits.addToKitTracker(p);
 						CupidKit(p);
 					} else {
-						Functions.tell(p, "§cYou must die before you use another kit.");
-						return false;
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 					}
 					if(!plugin.kits.hasCupidKit(p)){
 						plugin.kits.addToCupidKit(p);
@@ -117,14 +119,23 @@ public class Kits implements CommandExecutor {
 				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("assassin")){
-				assassin.add(p.getName());
 				if(p.hasPermission("kitpvp.assassin")){
 					if(!plugin.kits.hasAKit(p)){
 						plugin.kits.addToKitTracker(p);
+						assassin.add(p.getName());
 						AssassinKit(p);
 					} else {
-						Functions.tell(p, "§cYou must die before you use another kit");
-						return false;
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
+					}
+				} else Functions.noPerm(p);
+			}
+			if(cmd.getName().equalsIgnoreCase("knight")){
+				if(p.hasPermission("")){
+					if(!plugin.kits.hasAKit(p)){
+						plugin.kits.addToKitTracker(p);
+						KnightKit(p);
+					} else {
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 					}
 				} else Functions.noPerm(p);
 			}
@@ -151,7 +162,7 @@ public class Kits implements CommandExecutor {
 								plugin.kits.addToKitTracker(p);
 								plugin.kits.giveKit(p, args[0].toLowerCase());
 							} else {
-								Functions.tell(p, "§cYou must die before you use another kit.");
+								Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 							}
 						} else Functions.noPerm(p);
 					} else Functions.tell(p, "§cThat kit doesn't exist.");
@@ -258,7 +269,7 @@ public class Kits implements CommandExecutor {
 	public void ArcherKit(Player p){
 		PlayerInventory pi = p.getInventory();
 		clear(p);
-		p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 18000, 0));
+		Functions.givePot(p, PotionEffectType.FAST_DIGGING, 15*60, 0);
 		ItemStack bow = new ItemStack(Material.BOW);
 		bow.addEnchantment(Enchantment.ARROW_DAMAGE, 2);
 		bow.addEnchantment(Enchantment.ARROW_INFINITE, 1);
@@ -280,7 +291,7 @@ public class Kits implements CommandExecutor {
 	public void CupidKit(Player p){
 		PlayerInventory pi = p.getInventory();
 		clear(p);
-		p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 18000, 1));
+		Functions.givePot(p, PotionEffectType.JUMP, 15*60, 1);
 		ItemStack bow = new ItemStack(Material.BOW);
 		bow.addEnchantment(Enchantment.ARROW_INFINITE, 1);
 		ItemStack sword = new ItemStack(Material.STONE_SWORD, 1);
@@ -294,8 +305,6 @@ public class Kits implements CommandExecutor {
 	public void AssassinKit(Player p){
 		PlayerInventory pi = p.getInventory();
 		clear(p);
-		p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 2, 18000));
-		p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 4, 18000));
 		Functions.givePot(p, PotionEffectType.FAST_DIGGING, 300, 2);
 		Functions.givePot(p, PotionEffectType.SPEED, 300, 4);
 		ItemStack sword = new ItemStack(Material.IRON_SWORD, 1);
@@ -307,6 +316,30 @@ public class Kits implements CommandExecutor {
 		pi.setArmorContents(new ItemStack[] {boots, legs, chest, helm});
 		pi.addItem(sword);
 		for(int i=1; i<=33; i++)pi.addItem(soups);
+	}
+
+	public void KnightKit(Player p){
+		PlayerInventory pi = p.getInventory();
+		clear(p);
+		Functions.givePot(p, PotionEffectType.HEALTH_BOOST, 10, 3);
+		ItemStack sword = Functions.name(new ItemStack(Material.IRON_HOE), "§9Iron Halberd");
+		ItemStack helm = new ItemStack(Material.CHAINMAIL_HELMET);
+		ItemStack chest = new ItemStack(Material.CHAINMAIL_CHESTPLATE);
+		ItemStack legs = new ItemStack(Material.CHAINMAIL_LEGGINGS);
+		ItemStack boots = new ItemStack(Material.CHAINMAIL_BOOTS);
+		pi.setArmorContents(new ItemStack[] {boots, legs, chest, helm});
+		pi.addItem(sword, new ItemStack(Material.BOW));
+		for(int i = 1; i <= 32; i++)pi.addItem(soups);
+		pi.addItem(new ItemStack(Material.ARROW, 64));
+		Horse horse = p.getWorld().spawn(p.getLocation(), Horse.class);
+		horse.setTamed(true);
+		horse.setOwner(p);
+		HorseInventory inv = horse.getInventory();
+		horse.setAdult();
+		horse.setVariant(Variant.HORSE);
+		horse.setPassenger(p);
+		inv.setArmor(new ItemStack(Material.IRON_BARDING));
+		inv.setSaddle(new ItemStack(Material.SADDLE));
 	}
 
 	private ItemStack setColour(ItemStack item, Color color){

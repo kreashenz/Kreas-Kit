@@ -19,6 +19,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
@@ -30,7 +31,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -55,9 +56,9 @@ public class Events implements Listener {
 	private List<String> cooldown = new ArrayList<String>();
 
 	@EventHandler
-	public void PlayerDeath(PlayerDeathEvent e) {
+	public void PlayerDeath(EntityDeathEvent e) {
 		if(e.getEntity() instanceof Player && e.getEntity().getKiller() instanceof Player){
-			Player p = e.getEntity();
+			Player p = (Player)e.getEntity();
 			Player k = p.getKiller();
 
 			checkStreak(k);
@@ -85,6 +86,11 @@ public class Events implements Listener {
 				e.getDrops().clear();
 			}
 
+		}
+		if(e.getEntity() instanceof Horse){
+			Horse horse = (Horse)e.getEntity();
+			e.getDrops().clear();
+			horse.getWorld().createExplosion(horse.getLocation().getX(), horse.getLocation().getY(), horse.getLocation().getZ(), 0, false, false);
 		}
 	}
 

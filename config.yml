@@ -1,3 +1,5 @@
+# If you want to use horses in the config, please read the README-Update file. Thanks!
+
 version: 2.2 # Don't edit this, it will cause Kreas-Kits to break!
 
 config-save-delay: 60
@@ -12,10 +14,10 @@ messages:
   broadcast-15-killstreak: '&a%p &6is on a &a15 &6killstreak!'
   broadcast-20-killstreak: '&a%p &6is on a &a20 &6killstreak!'
   new-kit-permission: '&aYou can now use another kit!'
-  
   cupid-feather-use: '&aYou have used the Cupid flight ability!'
   cupid-feather-end: '&cYour arms are too tired to fly again, wait!'
   cupid-feather-canUse: '&aYou can now use Cupid flight ability again!'
+  must-die-before-new-kit: '&cYou must die before you use another kit!'
 
 allow:
   itemdropping: false
@@ -72,6 +74,52 @@ Kits:
 #      forceRidingHorse: true
 #      horseColour: black_white_dots
 #      horseType: horse
+  update:
+    items:
+      helmet: gold
+      chestplate: diamond
+      leggings: diamond
+      boots: leather
+      helmetEnchant: '0:4'
+      spawnHorse: true
+      forceRidingHorse: true
+      horseType: skeletal
+      0: '276'
+      1: '261'
+      2: '282'
+      3: '282'
+      4: '282'
+      5: '282'
+      6: '282'
+      7: '282'
+      8: '282'
+      9: '282'
+      10: '282'
+      11: '282'
+      12: '282'
+      13: '282'
+      14: '282'
+      15: '282'
+      16: '282'
+      17: '282'
+      18: '282'
+      19: '282'
+      20: '282'
+      21: '282'
+      22: '282'
+      23: '282'
+      24: '282'
+      25: '282'
+      26: '282'
+      27: '282'
+      28: '282'
+      29: '282'
+      30: '282'
+      31: '282'
+      32: '282'
+      33: '262:64'
+      34: '262:64'
+      35: '0'
     
 Money-To-Give-Per-Kill: 10
 Money-To-Give-On-3-KillStreak: 30

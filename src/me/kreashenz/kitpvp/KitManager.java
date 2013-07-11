@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import me.kreashenz.kitpvp.horse.HorseModifier;
-import me.kreashenz.kitpvp.horse.HorseType;
-import me.kreashenz.kitpvp.horse.HorseVariant;
 import me.kreashenz.kitpvp.utils.Functions;
 
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Horse.Color;
+import org.bukkit.entity.Horse.Variant;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.HorseInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
@@ -265,65 +265,78 @@ public class KitManager {
 
 		if(a.contains("Kits." + kit + ".spawnHorse")){
 			if(a.getBoolean("Kits." + kit + ".spawnHorse") == true){
-				HorseModifier horse = HorseModifier.spawn(p.getLocation());
+				Horse horse = p.getWorld().spawn(p.getLocation(), Horse.class);
+				HorseInventory horseInv = horse.getInventory();
 				if(a.contains("Kits." + kit + ".horseArmour")){
 					String path = a.getString("Kits." + kit + ".horseArmour");
-					if(path.equalsIgnoreCase("iron"))horse.setArmorItem(new ItemStack(Material.IRON_BARDING));
-					else if(path.equalsIgnoreCase("gold"))horse.setArmorItem(new ItemStack(Material.GOLD_BARDING));
-					else if(path.equalsIgnoreCase("diamond"))horse.setArmorItem(new ItemStack(Material.DIAMOND_BARDING));
+					if(path.equalsIgnoreCase("iron"))horseInv.setArmor(new ItemStack(Material.IRON_BARDING));
+					else if(path.equalsIgnoreCase("gold"))horseInv.setArmor(new ItemStack(Material.GOLD_BARDING));
+					else if(path.equalsIgnoreCase("diamond"))horseInv.setArmor(new ItemStack(Material.DIAMOND_BARDING));
 					else Functions.log(Level.WARNING, "Tried setting armour to an invalid type, available types: Iron, Gold, Diamond.");
 				}
 				if(a.contains("Kits." + kit + ".forceRidingHorse") && a.getBoolean("Kits." + kit + ".forceRidingHorse") == true){
-					horse.setSaddled(true);
-					horse.getHorse().setPassenger(p);
+					horseInv.setSaddle(new ItemStack(Material.SADDLE));
+					horse.setPassenger(p);
 				}
 				if(a.contains("Kits." + kit + ".horseColour")){
 					String path = a.getString("Kits." + kit + ".horseColour");
-					if(path.equalsIgnoreCase("black"))horse.setVariant(HorseVariant.BLACK);
-					else if(path.equalsIgnoreCase("black_black_dots"))horse.setVariant(HorseVariant.BLACK_BLACK_DOTS);
-					else if(path.equalsIgnoreCase("black_white"))horse.setVariant(HorseVariant.BLACK_WHITE);
-					else if(path.equalsIgnoreCase("black_white_dots"))horse.setVariant(HorseVariant.BLACK_WHITE_DOTS);
-					else if(path.equalsIgnoreCase("black_white_field"))horse.setVariant(HorseVariant.BLACK_WHITE_FIELD);
-					else if(path.equalsIgnoreCase("brown"))horse.setVariant(HorseVariant.BROWN);
-					else if(path.equalsIgnoreCase("brown_black_dots"))horse.setVariant(HorseVariant.BROWN_BLACK_DOTS);
-					else if(path.equalsIgnoreCase("brown_white"))horse.setVariant(HorseVariant.BROWN_WHITE);
-					else if(path.equalsIgnoreCase("brown_white_dots"))horse.setVariant(HorseVariant.BROWN_WHITE_DOTS);
-					else if(path.equalsIgnoreCase("brown_white_field"))horse.setVariant(HorseVariant.BROWN_WHITE_FIELD);
-					else if(path.equalsIgnoreCase("chestnut"))horse.setVariant(HorseVariant.CHESTNUT);
-					else if(path.equalsIgnoreCase("chestnut_black_dots"))horse.setVariant(HorseVariant.CHESTNUT_BLACK_DOTS);
-					else if(path.equalsIgnoreCase("chestnut_white"))horse.setVariant(HorseVariant.CHESTNUT_WHITE);
-					else if(path.equalsIgnoreCase("chestnut_white_dots"))horse.setVariant(HorseVariant.CHESTNUT_WHITE_DOTS);
-					else if(path.equalsIgnoreCase("chestnut_white_field"))horse.setVariant(HorseVariant.CHESTNUT_WHITE_FIELD);
-					else if(path.equalsIgnoreCase("creamy"))horse.setVariant(HorseVariant.CREAMY);
-					else if(path.equalsIgnoreCase("creamy_black_dots"))horse.setVariant(HorseVariant.CREAMY_BLACK_DOTS);
-					else if(path.equalsIgnoreCase("creamy_white"))horse.setVariant(HorseVariant.CREAMY_WHITE);
-					else if(path.equalsIgnoreCase("creamy_white_dots"))horse.setVariant(HorseVariant.CREAMY_WHITE_DOTS);
-					else if(path.equalsIgnoreCase("creamy_white_field"))horse.setVariant(HorseVariant.CREAMY_WHITE_FIELD);
-					else if(path.equalsIgnoreCase("dark_brown"))horse.setVariant(HorseVariant.DARK_BROWN);
-					else if(path.equalsIgnoreCase("dark_brown_black_dots"))horse.setVariant(HorseVariant.DARK_BROWN_BLACK_DOTS);
-					else if(path.equalsIgnoreCase("dark_brown_white"))horse.setVariant(HorseVariant.DARK_BROWN_WHITE);
-					else if(path.equalsIgnoreCase("dark_brown_white_dots"))horse.setVariant(HorseVariant.DARK_BROWN_WHITE_DOTS);
-					else if(path.equalsIgnoreCase("dark_brown_white_field"))horse.setVariant(HorseVariant.DARK_BROWN_WHITE_FIELD);
-					else if(path.equalsIgnoreCase("gray"))horse.setVariant(HorseVariant.GRAY);
-					else if(path.equalsIgnoreCase("gray_black_dots"))horse.setVariant(HorseVariant.GRAY_BLACK_DOTS);
-					else if(path.equalsIgnoreCase("gray_white"))horse.setVariant(HorseVariant.GRAY_WHITE);
-					else if(path.equalsIgnoreCase("gray_white_dots"))horse.setVariant(HorseVariant.GRAY_WHITE_DOTS);
-					else if(path.equalsIgnoreCase("gray_white_field"))horse.setVariant(HorseVariant.GRAY_WHITE_FIELD);
-					else if(path.equalsIgnoreCase("invisible"))horse.setVariant(HorseVariant.INVISIBLE);
-					else if(path.equalsIgnoreCase("white"))horse.setVariant(HorseVariant.WHITE);
-					else if(path.equalsIgnoreCase("white_black_dots"))horse.setVariant(HorseVariant.WHITE_BLACK_DOTS);
-					else if(path.equalsIgnoreCase("white_white"))horse.setVariant(HorseVariant.WHITE_WHITE);
-					else if(path.equalsIgnoreCase("white_white_dots"))horse.setVariant(HorseVariant.WHITE_WHITE_DOTS);
-					else if(path.equalsIgnoreCase("white_white_field"))horse.setVariant(HorseVariant.WHITE_WHITE_FIELD);
+					/*
+					 * @see Commented out because 'me.kreashenz.kitpvp.HorseModifier cannot be cast to org.bukkit.entity.Horse'
+					 * 
+					if(path.equalsIgnoreCase("black")) ((HorseModifier)horse).setVariant(HorseVariant.BLACK);
+					else if (path.equalsIgnoreCase("black_black_dots")) ((HorseModifier)horse).setVariant(HorseVariant.BLACK_BLACK_DOTS);
+					else if (path.equalsIgnoreCase("black_white")) ((HorseModifier)horse).setVariant(HorseVariant.BLACK_WHITE);
+					else if (path.equalsIgnoreCase("black_white_dots")) ((HorseModifier)horse).setVariant(HorseVariant.BLACK_WHITE_DOTS);
+					else if (path.equalsIgnoreCase("black_white_field")) ((HorseModifier)horse).setVariant(HorseVariant.BLACK_WHITE_FIELD);
+					else if (path.equalsIgnoreCase("brown")) ((HorseModifier)horse).setVariant(HorseVariant.BROWN);
+					else if (path.equalsIgnoreCase("brown_black_dots")) ((HorseModifier)horse).setVariant(HorseVariant.BROWN_BLACK_DOTS);
+					else if (path.equalsIgnoreCase("brown_white")) ((HorseModifier)horse).setVariant(HorseVariant.BROWN_WHITE);
+					else if (path.equalsIgnoreCase("brown_white_dots")) ((HorseModifier)horse).setVariant(HorseVariant.BROWN_WHITE_DOTS);
+					else if (path.equalsIgnoreCase("brown_white_field")) ((HorseModifier)horse).setVariant(HorseVariant.BROWN_WHITE_FIELD);
+					else if (path.equalsIgnoreCase("chestnut")) ((HorseModifier)horse).setVariant(HorseVariant.CHESTNUT);
+					else if (path.equalsIgnoreCase("chestnut_black_dots")) ((HorseModifier)horse).setVariant(HorseVariant.CHESTNUT_BLACK_DOTS);
+					else if (path.equalsIgnoreCase("chestnut_white")) ((HorseModifier)horse).setVariant(HorseVariant.CHESTNUT_WHITE);
+					else if (path.equalsIgnoreCase("chestnut_white_dots")) ((HorseModifier)horse).setVariant(HorseVariant.CHESTNUT_WHITE_DOTS);
+					else if (path.equalsIgnoreCase("chestnut_white_field")) ((HorseModifier)horse).setVariant(HorseVariant.CHESTNUT_WHITE_FIELD);
+					else if (path.equalsIgnoreCase("creamy")) ((HorseModifier)horse).setVariant(HorseVariant.CREAMY);
+					else if (path.equalsIgnoreCase("creamy_black_dots")) ((HorseModifier)horse).setVariant(HorseVariant.CREAMY_BLACK_DOTS);
+					else if (path.equalsIgnoreCase("creamy_white")) ((HorseModifier)horse).setVariant(HorseVariant.CREAMY_WHITE);
+					else if (path.equalsIgnoreCase("creamy_white_dots")) ((HorseModifier)horse).setVariant(HorseVariant.CREAMY_WHITE_DOTS);
+					else if (path.equalsIgnoreCase("creamy_white_field")) ((HorseModifier)horse).setVariant(HorseVariant.CREAMY_WHITE_FIELD);
+					else if (path.equalsIgnoreCase("dark_brown")) ((HorseModifier)horse).setVariant(HorseVariant.DARK_BROWN);
+					else if (path.equalsIgnoreCase("dark_brown_black_dots")) ((HorseModifier)horse).setVariant(HorseVariant.DARK_BROWN_BLACK_DOTS);
+					else if (path.equalsIgnoreCase("dark_brown_white")) ((HorseModifier)horse).setVariant(HorseVariant.DARK_BROWN_WHITE);
+					else if (path.equalsIgnoreCase("dark_brown_white_dots")) ((HorseModifier)horse).setVariant(HorseVariant.DARK_BROWN_WHITE_DOTS);
+					else if (path.equalsIgnoreCase("dark_brown_white_field")) ((HorseModifier)horse).setVariant(HorseVariant.DARK_BROWN_WHITE_FIELD);
+					else if (path.equalsIgnoreCase("gray")) ((HorseModifier)horse).setVariant(HorseVariant.GRAY);
+					else if (path.equalsIgnoreCase("gray_black_dots")) ((HorseModifier)horse).setVariant(HorseVariant.GRAY_BLACK_DOTS);
+					else if (path.equalsIgnoreCase("gray_white")) ((HorseModifier)horse).setVariant(HorseVariant.GRAY_WHITE);
+					else if (path.equalsIgnoreCase("gray_white_dots")) ((HorseModifier)horse).setVariant(HorseVariant.GRAY_WHITE_DOTS);
+					else if (path.equalsIgnoreCase("gray_white_field")) ((HorseModifier)horse).setVariant(HorseVariant.GRAY_WHITE_FIELD);
+					else if (path.equalsIgnoreCase("invisible")) ((HorseModifier)horse).setVariant(HorseVariant.INVISIBLE);
+					else if (path.equalsIgnoreCase("white")) ((HorseModifier)horse).setVariant(HorseVariant.WHITE);
+					else if (path.equalsIgnoreCase("white_black_dots")) ((HorseModifier)horse).setVariant(HorseVariant.WHITE_BLACK_DOTS);
+					else if (path.equalsIgnoreCase("white_white")) ((HorseModifier)horse).setVariant(HorseVariant.WHITE_WHITE);
+					else if (path.equalsIgnoreCase("white_white_dots")) ((HorseModifier)horse).setVariant(HorseVariant.WHITE_WHITE_DOTS);
+					else if (path.equalsIgnoreCase("white_white_field")) ((HorseModifier)horse).setVariant(HorseVariant.WHITE_WHITE_FIELD);
 					else Functions.log(Level.WARNING, "Tried setting the horse's colour to one not found.");
+					 */
+					if(path.equalsIgnoreCase("black"))horse.setColor(Color.BLACK);
+					else if(path.equalsIgnoreCase("brown"))horse.setColor(Color.BROWN);
+					else if(path.equalsIgnoreCase("chestnut"))horse.setColor(Color.CHESTNUT);
+					else if(path.equalsIgnoreCase("creamy"))horse.setColor(Color.CREAMY);
+					else if(path.equalsIgnoreCase("dark_brown"))horse.setColor(Color.DARK_BROWN);
+					else if(path.equalsIgnoreCase("gray"))horse.setColor(Color.GRAY);
+					else if(path.equalsIgnoreCase("white"))horse.setColor(Color.WHITE);
+					else Functions.log(Level.WARNING, "Tried setting the horse's color to one not found.");
 				}
 				if(a.contains("Kits." + kit + ".horseType")){
 					String path = a.getString("Kits." + kit + ".horseType");
-					if(path.equalsIgnoreCase("horse"))horse.setType(HorseType.NORMAL);
-					else if(path.equalsIgnoreCase("donkey"))horse.setType(HorseType.DONKEY);
-					else if(path.equalsIgnoreCase("mule"))horse.setType(HorseType.MULE);
-					else if(path.equalsIgnoreCase("undead"))horse.setType(HorseType.UNDEAD);
-					else if(path.equalsIgnoreCase("skeletal"))horse.setType(HorseType.SKELETAL);
+					if(path.equalsIgnoreCase("horse"))horse.setVariant(Variant.HORSE);
+					else if(path.equalsIgnoreCase("donkey"))horse.setVariant(Variant.DONKEY);
+					else if(path.equalsIgnoreCase("mule"))horse.setVariant(Variant.MULE);
+					else if(path.equalsIgnoreCase("undead"))horse.setVariant(Variant.UNDEAD_HORSE);
+					else if(path.equalsIgnoreCase("skeletal"))horse.setVariant(Variant.SKELETON_HORSE);
 					else Functions.log(Level.WARNING, "Tried setting the horse's type to one wasn't found.");
 				}
 			}
@@ -333,7 +346,7 @@ public class KitManager {
 
 	private ItemStack setColour(ItemStack item, int colour){
 		LeatherArmorMeta im = (LeatherArmorMeta) item.getItemMeta();
-		im.setColor(Color.fromRGB(colour));
+		im.setColor(org.bukkit.Color.fromRGB(colour));
 		item.setItemMeta(im);
 		return item;
 	}
