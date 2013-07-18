@@ -25,7 +25,7 @@ public class SBManager {
 	public SBManager(KitPvP plugin){
 		this.plugin = plugin;
 
-		this.streakUtils = new KillstreakUtils(plugin);
+		this.streakUtils = plugin.streakUtils;
 	}
 
 	public void setBoard(Player p){
@@ -42,10 +42,10 @@ public class SBManager {
 			a.setScore(streakUtils.getStreaks(p));
 
 			Score b = objective.getScore(Bukkit.getOfflinePlayer("§aKills"));
-			b.setScore(streakUtils.getKills(p));
+			b.setScore(streakUtils.getHashKills(p));
 
 			Score c = objective.getScore(Bukkit.getOfflinePlayer("§aDeaths"));
-			c.setScore(streakUtils.getDeaths(p));
+			c.setScore(streakUtils.getHashDeaths(p));
 
 			p.setScoreboard(board);
 		}

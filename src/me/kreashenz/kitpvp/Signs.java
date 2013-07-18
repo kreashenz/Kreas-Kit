@@ -20,7 +20,7 @@ public class Signs implements Listener {
 
 	public Signs(KitPvP plugin) {
 		this.plugin = plugin;
-		this.kits = new Kits(plugin);
+		this.kits = plugin.kit;
 	}
 
 	@SuppressWarnings("deprecation")

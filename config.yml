@@ -5,7 +5,7 @@ version: 2.2 # Don't edit this, it will cause Kreas-Kits to break!
 config-save-delay: 60
 
 messages:
-  killer-message-on-streak: '&You have a &a%streak% &6killstreak!'
+  killer-message-on-streak: '&6You have a &a%streak% &6killstreak!'
   killer-message-per-kill: '&aYou got &6%amount% &afor killing &6%p&a!'
   broadcast-3-killstreak: '&a%p &6is on a &a3 &6killstreak!'
   broadcast-5-killstreak: '&a%p &6is on a &a5 &6killstreak!'

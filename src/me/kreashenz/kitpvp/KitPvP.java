@@ -6,10 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import me.kreashenz.kitpvp.metrics.Metrics;
@@ -22,15 +18,15 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class KitPvP extends JavaPlugin {
 
-	private ScheduledExecutorService service = null;
-	private ScheduledFuture<?> i = null;
-
-	public KitManager kits;
 	public Economy econ = null;
+	
+	public KitManager kits;
 	public Kits kit;
+	public KillstreakUtils streakUtils;
 	public SBManager sb;
 
 	@Override
@@ -55,8 +51,9 @@ public class KitPvP extends JavaPlugin {
 
 		saveDefaultConfig();
 
+		streakUtils = new KillstreakUtils(this);
 		kits = new KitManager(this);
-		kit = new Kits(this);
+		kit = new Kits();
 		sb = new SBManager(this);
 
 		listener(new Events(this));
@@ -89,7 +86,7 @@ public class KitPvP extends JavaPlugin {
 	}
 
 	private void checkForOldConfig(){
-		if(getConfig().getDouble("version") != Double.valueOf(getDescription().getVersion())){
+		if(getConfig().getDouble("version") != Double.valueOf(getDescription().getVersion()) || (!(getConfig().contains("version")))){
 
 			try {
 				File old = new File(getDataFolder().getAbsolutePath() + File.separator + "config.yml.old");
@@ -118,7 +115,7 @@ public class KitPvP extends JavaPlugin {
 	}
 
 	private void command(String cmd){
-		getCommand(cmd).setExecutor(kit);
+		getCommand(cmd).setExecutor(new Commands(this));
 	}
 
 	private void listener(Listener listener){
@@ -153,17 +150,12 @@ public class KitPvP extends JavaPlugin {
 	}
 
 	private void runStatsSaveTimer(){
-		service = Executors.newScheduledThreadPool(1);
-		i = service.scheduleAtFixedRate(new Runnable(){
-			public void run(){
-				new KillstreakUtils(new KitPvP()).save();
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new BukkitRunnable(){
+			@Override
+			public void run() {
+				streakUtils.save();
 			}
-		}, 0L, getConfig().getInt("config-save-delay"), TimeUnit.SECONDS);
-	}
-
-	public void cancel(){
-		service.shutdown();
-		i.cancel(true);
+		}, 0L, getConfig().getInt("config-save-delay")*20);
 	}
 
 }

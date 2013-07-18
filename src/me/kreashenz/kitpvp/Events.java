@@ -50,7 +50,7 @@ public class Events implements Listener {
 
 	public Events(KitPvP plugin){
 		this.plugin = plugin;
-		this.streakUtils = new KillstreakUtils(plugin);
+		this.streakUtils = plugin.streakUtils;
 	}
 
 	private List<String> cooldown = new ArrayList<String>();
