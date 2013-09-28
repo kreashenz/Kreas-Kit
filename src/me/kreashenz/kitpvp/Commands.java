@@ -29,7 +29,7 @@ public class Commands implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("archer")){
 				if(p.hasPermission("kitpvp.archer")){
 					if(!plugin.kits.hasAKit(p)){
-						plugin.kits.addToKitTracker(p);
+						plugin.kits.whoHasAKit.add(p.getName());
 						kits.ArcherKit(p);
 					} else {
 						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
@@ -39,7 +39,7 @@ public class Commands implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("pvp")){
 				if(p.hasPermission("kitpvp.pvp")){
 					if(!plugin.kits.hasAKit(p)){
-						plugin.kits.addToKitTracker(p);
+						plugin.kits.whoHasAKit.add(p.getName());
 						kits.PvPKit(p);
 					} else {
 						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
@@ -49,7 +49,7 @@ public class Commands implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("tank")){
 				if(p.hasPermission("kitpvp.tank")){
 					if(!plugin.kits.hasAKit(p)){
-						plugin.kits.addToKitTracker(p);
+						plugin.kits.whoHasAKit.add(p.getName());
 						kits.TankKit(p);
 					} else {
 						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
@@ -59,7 +59,7 @@ public class Commands implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("pyro")){
 				if(p.hasPermission("kitpvp.pyro")){
 					if(!plugin.kits.hasAKit(p)){
-						plugin.kits.addToKitTracker(p);
+						plugin.kits.whoHasAKit.add(p.getName());
 						kits.PyroKit(p);
 					} else {
 						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
@@ -86,7 +86,7 @@ public class Commands implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("medic")){
 				if(p.hasPermission("kitpvp.medic")){
 					if(!plugin.kits.hasAKit(p)){
-						plugin.kits.addToKitTracker(p);
+						plugin.kits.whoHasAKit.add(p.getName());
 						kits.MedicKit(p);
 					} else {
 						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
@@ -96,20 +96,20 @@ public class Commands implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("cupid")){
 				if(p.hasPermission("kitpvp.cupid")){
 					if(!plugin.kits.hasAKit(p)){
-						plugin.kits.addToKitTracker(p);
+						plugin.kits.whoHasAKit.add(p.getName());
 						kits.CupidKit(p);
 					} else {
 						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
 					}
-					if(!plugin.kits.hasCupidKit(p)){
-						plugin.kits.addToCupidKit(p);
+					if(!plugin.kits.isInCupidKit.contains(p.getName())){
+						plugin.kits.isInCupidKit.add(p.getName());
 					}
 				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("assassin")){
 				if(p.hasPermission("kitpvp.assassin")){
 					if(!plugin.kits.hasAKit(p)){
-						plugin.kits.addToKitTracker(p);
+						plugin.kits.whoHasAKit.add(p.getName());
 						kits.assassin.add(p.getName());
 						kits.AssassinKit(p);
 					} else {
@@ -118,9 +118,9 @@ public class Commands implements CommandExecutor {
 				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("knight")){
-				if(p.hasPermission("")){
+				if(p.hasPermission("kitpvp.knight")){
 					if(!plugin.kits.hasAKit(p)){
-						plugin.kits.addToKitTracker(p);
+						plugin.kits.whoHasAKit.add(p.getName());
 						kits.KnightKit(p);
 					} else {
 						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
@@ -128,38 +128,35 @@ public class Commands implements CommandExecutor {
 				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("kkit")){
-				if(args.length == 1){
-					if(args[0].equalsIgnoreCase("list")){
-						if(p.hasPermission("kitpvp.list")){
-							String str = "";
-							for(String st : plugin.getConfig().getConfigurationSection("Kits").getKeys(false)){
-								if(p.hasPermission("kitpvp." + st)){
-									st = "§a" + st + "§f";
-								} else {
-									st = "§c" + st + "§f";
-								}
-								str = str + st + ", ";
-							}
-							str = str.substring(0, str.length()-2);
-							Functions.tell(p, "§8You can use the §agreen §8.");
-							Functions.tell(p, str);
-						} else Functions.noPerm(p);
-					} else if(plugin.getConfig().getConfigurationSection("Kits").contains(args[0])){
-						if(p.hasPermission("kitpvp."+args[0].toLowerCase())){
-							if(!plugin.kits.hasAKit(p)){
-								plugin.kits.addToKitTracker(p);
-								plugin.kits.giveKit(p, args[0].toLowerCase());
-							} else {
-								Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
-							}
-						} else Functions.noPerm(p);
-					} else if(args[0].equalsIgnoreCase("reload")){
-						if(p.hasPermission("kkit.reload")){
+				if(p.hasPermission("kitpvp.control")){
+					if(args.length != 1){
+						Functions.tell(p, "§cInvalid usage. §f/kkit <reload | save>");
+					} else {
+						if(args[0].equalsIgnoreCase("save")){
+							plugin.saveConfig();
+						} else if(args[0].equalsIgnoreCase("reload")){
 							plugin.reloadConfig();
-							Functions.tell(p, "§aReloaded config.");
-						} else Functions.noPerm(p);
-					} else Functions.tell(p, "§cThat kit doesn't exist.");
-				} else Functions.tell(p, "§cUsage : §f/kkit <kitName | list>");
+						} else {
+							Functions.tell(p, "§cInvalid usage. §f/kkit <reload | save>");
+						}
+					}
+				} else Functions.noPerm(p);
+			}
+			if(cmd.getName().equalsIgnoreCase("kitlist")){
+				if(p.hasPermission("kitpvp.list")){
+					String str = "";
+					for(String st : plugin.getConfig().getConfigurationSection("Kits").getKeys(false)){
+						if(p.hasPermission("kitpvp." + st)){
+							st = "§a" + st + "§f";
+						} else {
+							st = "§c" + st + "§f";
+						}
+						str = str + st + ", ";
+					}
+					str = str.substring(0, str.length()-2);
+					Functions.tell(p, "§8You can use the §agreen §8.");
+					Functions.tell(p, str);
+				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("stats")){
 				DecimalFormat d = new DecimalFormat("##.##");

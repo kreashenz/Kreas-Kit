@@ -22,8 +22,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class KitPvP extends JavaPlugin {
 
+	private static KitPvP instance;
+
 	public Economy econ = null;
-	
+
 	public KitManager kits;
 	public Kits kit;
 	public KillstreakUtils streakUtils;
@@ -31,6 +33,8 @@ public class KitPvP extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+
+		instance = this;
 
 		String path = getDataFolder().getAbsolutePath() + File.separator + "stats.yml";
 
@@ -70,8 +74,9 @@ public class KitPvP extends JavaPlugin {
 		command("kkit");
 		command("assassin");
 		command("knight");
+		command("kitlist");
 
-		setupVault(getServer().getPluginManager());
+		setupVault();
 
 		try {
 			Metrics metrics = new Metrics(this);
@@ -83,6 +88,8 @@ public class KitPvP extends JavaPlugin {
 		checkForOldConfig();
 
 		runStatsSaveTimer();
+
+		for (String kits : getConfig().getStringList("Kits"))getLogger().info("Successfully registered kit: " + kits);
 	}
 
 	private void checkForOldConfig(){
@@ -123,8 +130,8 @@ public class KitPvP extends JavaPlugin {
 		pm.registerEvents(listener, this);
 	}
 
-	private void setupVault(PluginManager pm) {
-		Plugin vault =  pm.getPlugin("Vault");
+	private void setupVault() {
+		Plugin vault =  getServer().getPluginManager().getPlugin("Vault");
 		if (vault != null && vault instanceof net.milkbowl.vault.Vault) {
 			Functions.log(Level.INFO, "Loaded Vault v" + vault.getDescription().getVersion());
 			if (!setupEconomy()) {
@@ -156,6 +163,10 @@ public class KitPvP extends JavaPlugin {
 				streakUtils.save();
 			}
 		}, 0L, getConfig().getInt("config-save-delay")*20);
+	}
+
+	public static KitPvP getInstance(){
+		return instance;
 	}
 
 }

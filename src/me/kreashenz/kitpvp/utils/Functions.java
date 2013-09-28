@@ -2,6 +2,8 @@ package me.kreashenz.kitpvp.utils;
 
 import java.util.logging.Level;
 
+import me.kreashenz.kitpvp.KitPvP;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -25,7 +27,7 @@ public class Functions {
 	}
 
 	public static void noPerm(Player p){
-		tell(p, "§cYou don't have permission.");
+		tell(p, format(new KitPvP().getConfig().getString("messages.no-permission")));
 	}
 
 	public static ItemStack name(ItemStack item, String name){
@@ -38,5 +40,5 @@ public class Functions {
 	public static void givePot(Player p, PotionEffectType pot, int time, int level){
 		p.addPotionEffect(new PotionEffect(pot, time*20, level));
 	}
-	
+
 }

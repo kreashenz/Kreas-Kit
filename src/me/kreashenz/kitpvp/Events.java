@@ -33,6 +33,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -56,7 +57,7 @@ public class Events implements Listener {
 	private List<String> cooldown = new ArrayList<String>();
 
 	@EventHandler
-	public void PlayerDeath(EntityDeathEvent e) {
+	public void entityDeath(EntityDeathEvent e) {
 		if(e.getEntity() instanceof Player && e.getEntity().getKiller() instanceof Player){
 			Player p = (Player)e.getEntity();
 			Player k = p.getKiller();
@@ -160,7 +161,7 @@ public class Events implements Listener {
 			break;
 		case 20:
 			if(plugin.kits.hasAKit(p)){
-				plugin.kits.takeFromKitTracker(p);
+				plugin.kits.whoHasAKit.remove(p.getName());
 
 				pi.addItem(new ItemStack(Material.EGG, 5));
 				Functions.tell(p, "§6You have been given some §aFire Grenades§6!");
@@ -205,20 +206,32 @@ public class Events implements Listener {
 				e1.printStackTrace();
 			}
 		}
+
+		if(!(streakUtils.deaths.containsKey(p.getName()))){
+			streakUtils.deaths.put(p.getName(), 0);
+		}
+
+		if(!(streakUtils.kills.containsKey(p.getName()))){
+			streakUtils.kills.put(p.getName(), 0);
+		}
+
 	}
 
 	@SuppressWarnings("deprecation")
 	@EventHandler
-	public void onTnTThrow(PlayerInteractEvent e){
-		Player p = e.getPlayer();
+	public void onInteract(PlayerInteractEvent e){
+		final Player p = e.getPlayer();
+
+		ItemStack bowl = new ItemStack(Material.BOWL, 1);
+
 		if(plugin.getConfig().getBoolean("MustHaveKitToThrowTNT", true)){
 			if(e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK){
 				if(p.getItemInHand().getType() == Material.TNT){
-					if(p.getItemInHand().getAmount()>=16) {
+					if(p.getItemInHand().getAmount()>=2) {
 						TNTPrimed tnt = p.getWorld().spawn(p.getLocation().add(0.65, 1.65, 0), TNTPrimed.class);
 						tnt.setVelocity(p.getLocation().getDirection().multiply(2));
 						tnt.setFuseTicks(40);
-						if(p.getItemInHand().getAmount()>16) {p.getItemInHand().setAmount(p.getItemInHand().getAmount()-16);
+						if(p.getItemInHand().getAmount()>2) {p.getItemInHand().setAmount(p.getItemInHand().getAmount()-2);
 						} else {
 							p.setItemInHand(new ItemStack(Material.AIR, 0));
 						}
@@ -227,14 +240,9 @@ public class Events implements Listener {
 				}
 			}
 		}
-	}
 
-	@EventHandler
-	public void onSoupConsume(PlayerInteractEvent e) {
-		Player p = e.getPlayer();
-		ItemStack bowl = new ItemStack(Material.BOWL, 1);
-		try {
-			if (e.getAction() == Action.RIGHT_CLICK_AIR && p.getItemInHand().getType() == Material.MUSHROOM_SOUP 
+		if(p.getItemInHand() != null || p.getItemInHand().getType() != Material.AIR){
+			if (e.getAction() == Action.RIGHT_CLICK_AIR && p.getItemInHand().getType() == Material.MUSHROOM_SOUP
 					&& p.getHealth() + 7 <= 20) {
 				e.setCancelled(true);
 				p.getInventory().setItemInHand(bowl);
@@ -246,7 +254,41 @@ public class Events implements Listener {
 				p.getInventory().setItemInHand(bowl);
 				p.setHealth(20);
 			}
-		} catch (IllegalArgumentException iea){}
+		}
+
+		if(e.getAction() == Action.RIGHT_CLICK_AIR
+				||e.getAction() == Action.RIGHT_CLICK_BLOCK){
+			if(p.getItemInHand().getType() == Material.FEATHER){
+				if(!cooldown.contains(p.getName())){
+					if(p.getGameMode() == GameMode.CREATIVE){
+						Functions.tell(p, "§cYou are already in fly mode, silly :)");
+					} else {
+						cooldown.add(p.getName());
+						p.setAllowFlight(true);
+						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-use")));
+					}
+					new BukkitRunnable(){
+						@Override
+						public void run(){
+							if(p.getGameMode() == GameMode.CREATIVE){
+								p.setAllowFlight(true);
+							} else {
+								p.setAllowFlight(false);
+								Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-end")));
+							}
+						}
+					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Length-Cupid-Kit")*20);
+					new BukkitRunnable(){
+						@Override
+						public void run(){
+							cooldown.remove(p.getName());
+							Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-canUse")));
+						}
+					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Cooldown-Cupid-Kit")*20);
+				}
+			}
+		}
+
 	}
 
 	@EventHandler
@@ -299,48 +341,11 @@ public class Events implements Listener {
 	}
 
 	@EventHandler
-	public void onFeatherFly(PlayerInteractEvent e){
-		final Player p = e.getPlayer();
-		if(e.getAction() == Action.RIGHT_CLICK_AIR
-				||e.getAction() == Action.RIGHT_CLICK_BLOCK){
-			if(p.getItemInHand().getType() == Material.FEATHER){
-				if(!cooldown.contains(p.getName())){
-					if(p.getGameMode() == GameMode.CREATIVE){
-						Functions.tell(p, "§cYou are already in fly mode, silly :)");
-					} else {
-						cooldown.add(p.getName());
-						p.setAllowFlight(true);
-						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-use")));
-					}
-					new BukkitRunnable(){
-						@Override
-						public void run(){
-							if(p.getGameMode() == GameMode.CREATIVE){
-								p.setAllowFlight(true);
-							} else {
-								p.setAllowFlight(false);
-								Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-end")));
-							}
-						}
-					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Length-Cupid-Kit")*20);
-					new BukkitRunnable(){
-						@Override
-						public void run(){
-							cooldown.remove(p.getName());
-							Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-canUse")));
-						}
-					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Cooldown-Cupid-Kit")*20);
-				}
-			}
-		}
-	}
-
-	@EventHandler
 	public void onCupidFall(EntityDamageEvent e){
 		if(e.getEntity() instanceof Player){
 			Player p = (Player)e.getEntity();
 			if(e.getCause() == DamageCause.FALL){
-				if(plugin.kits.hasCupidKit(p)){
+				if(plugin.kits.isInCupidKit.contains(p.getName())){
 					e.setCancelled(true);
 				} else {
 					e.setCancelled(false);
@@ -354,8 +359,7 @@ public class Events implements Listener {
 		Player p = e.getPlayer();
 		for(Player ps : Bukkit.getOnlinePlayers()){
 			if(plugin.kit.assassin.contains(p.getName())){
-				if (!p.canSee(ps))
-				{
+				if (!p.canSee(ps)) {
 					p.hidePlayer(ps);
 				}
 			}
@@ -363,12 +367,27 @@ public class Events implements Listener {
 		for(Entity ents : p.getNearbyEntities(13, 13, 13)){
 			if(ents instanceof LivingEntity && ents instanceof Player){
 				Player ps = (Player)ents;
-
-				if (!p.canSee(ps))
-				{
+				if (!p.canSee(ps)) {
 					p.hidePlayer(ps);
 				}
 			}
+		}
+	}
+
+	@EventHandler
+	public void onCommandPreProcess(PlayerCommandPreprocessEvent e){
+		Player p = e.getPlayer();
+		String msg = e.getMessage().split(" ")[0].replace("/", "").toLowerCase();
+
+		for(String str : plugin.getConfig().getStringList("kits")){
+			if(msg.equalsIgnoreCase(str)){
+				e.setCancelled(true);
+				if(!(plugin.kits.hasAKit(p))){
+					if(p.hasPermission("kitpvp." + msg)){
+						plugin.kits.giveKit(p, msg);
+					} else Functions.noPerm(p);
+				} else Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
+			} else Functions.tell(p, "§cThat kit doesn't exist! Use §f/kitlist §cto check available kits!");
 		}
 	}
 
