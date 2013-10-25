@@ -1,9 +1,12 @@
 package me.kreashenz.kitpvp;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
 import me.kreashenz.kitpvp.utils.Functions;
+import me.kreashenz.kitpvp.utils.InventoryStuff;
+import me.kreashenz.kitpvp.utils.PManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
@@ -19,29 +22,30 @@ import org.bukkit.inventory.ItemStack;
 public class Signs implements Listener {
 
 	private String prefix = "§1[Kreas-Kits]";
-	
-	private KitPvP plugin;
-	private Kits kits;
 
-	private Set<String> allKits;
+	private Set<String> allConfKits;
+	private Set<String> allFolderKits;
 
-	public Signs(KitPvP plugin) {
-		this.plugin = plugin;
-		this.kits = plugin.kit;
-
-		allKits = new HashSet<String>(plugin.getConfig().getConfigurationSection("Kits").getKeys(false));
-		for(String str : plugin.getConfig().getConfigurationSection("Kits").getKeys(false))allKits.add(str);
+	public Signs() {
+		allConfKits = new HashSet<String>(KitPvP.getInstance().getConfig().getConfigurationSection("Kits").getKeys(false));
+		for(String str : KitPvP.getInstance().getConfig().getConfigurationSection("Kits").getKeys(false))allConfKits.add(str);
+		for(File f : new File(KitPvP.getInstance().getDataFolder() + File.separator + "kits").listFiles()){
+			if(!(f.getName().startsWith("."))){
+				String s = f.getName().replace(".yml", "");
+				allFolderKits.add(s);
+			}
+		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPlayerClickSign(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
-		if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock() != null)
+		PManager pm = PManager.getPManager(p);
+		if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock() != null){
 			if (e.getClickedBlock().getState() instanceof Sign) {
 				Sign s = (Sign) e.getClickedBlock().getState();
 				String[] lines = s.getLines();
-				if (lines.length > 1 && lines[0].equalsIgnoreCase(prefix)) {
+				if (lines[0].equalsIgnoreCase(prefix)) {
 					if (p.hasPermission("kitpvp.signs")) {
 						if (lines[1].equalsIgnoreCase("Full") || lines[1].equalsIgnoreCase("Soups")
 								|| (lines[1].equalsIgnoreCase("FullSoup"))
@@ -54,71 +58,54 @@ public class Signs implements Listener {
 								p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP, 3));
 						}
 						else if(lines[1].equalsIgnoreCase("Pyro")){
-							if(!p.hasPermission("kitpvp.pyro")){
-								Functions.tell(p, "§cYou do not have permission to use the Pyro kit.");
-								return;
-							}
-							p.getInventory().clear();
-							kits.PyroKit(p);
-							p.updateInventory();
+							if(p.hasPermission("kitpvp.pyro")){
+								pm.giveKit("pyro");
+							} else Functions.noPerm(p);
 						}
 						else if(lines[1].equalsIgnoreCase("PvP")){
-							if(!p.hasPermission("kitpvp.pvp")){
-								Functions.tell(p, "§cYou do not have permission to use the PvP kit.");
-								return;
-							}
-							p.getInventory().clear();
-							kits.PvPKit(p);
-							p.updateInventory();
+							if(p.hasPermission("kitpvp.pvp")){
+								pm.giveKit("pvp");
+							} else Functions.noPerm(p);
 						}
 						else if(lines[1].equalsIgnoreCase("Tank")){
-							if(!p.hasPermission("kitpvp.tank")){
-								Functions.tell(p, "§cYou do not have permission to use the Tank kit.");
-								return;
-							}
-							p.getInventory().clear();
-							kits.TankKit(p);
-							p.updateInventory();
+							if(p.hasPermission("kitpvp.tank")){
+								pm.giveKit("tank");
+							} else Functions.noPerm(p);
 						}
 						else if(lines[1].equalsIgnoreCase("medic")){
-							if(!p.hasPermission("kitpvp.medic")){
-								Functions.tell(p, "§cYou do not have permission to use the Medic kit.");
-								return;
-							}
-							p.getInventory().clear();
-							kits.MedicKit(p);
-							p.updateInventory();
+							if(p.hasPermission("kitpvp.medic")){
+								pm.giveKit("medic");
+							} else Functions.noPerm(p);
 						}
 						else if(lines[1].equalsIgnoreCase("archer")){
-							if(!p.hasPermission("kitpvp.archer")){
-								Functions.tell(p, "§cYou do not have permission to use the Archer kit.");
-								return;
-							}
-							p.getInventory().clear();
-							kits.ArcherKit(p);
-							p.updateInventory();
-						}
-						else if(allKits.contains(lines[1])){
-							if(!p.hasPermission("kitpvp."+lines[1].toLowerCase()+".use")){
-								Functions.tell(p, "§cYou do not have permission to use custom kits.");
-								return;
-							}
-							p.getInventory().clear();
-							plugin.kits.giveKit(p, lines[1]);
-							p.updateInventory();
+							if(p.hasPermission("kitpvp.archer")){
+								pm.giveKit("archer");
+							} else Functions.noPerm(p);
 						}
 						else if(lines[1].equalsIgnoreCase("cupid")){
-							if(!p.hasPermission("kitpvp.cupid")){
-								Functions.tell(p, "§cYou do not have permission to use the Cupid kit.");
-								return;
-							}
-							p.getInventory().clear();
-							kits.CupidKit(p);
-							p.updateInventory();
+							if(p.hasPermission("kitpvp.cupid")){
+								pm.giveKit("cupid");
+							} else Functions.noPerm(p);
 						}
-					}
-				} else Functions.tell(p, "§cYou don't have permission to use signs.");
+						else if(lines[1].equalsIgnoreCase("assassin")){
+							if(p.hasPermission("kitpvp.assassin")){
+								pm.giveKit("assassin");
+							} else Functions.noPerm(p);
+						}
+						else if(allConfKits.contains(lines[1])){
+							if(p.hasPermission("kitpvp." + lines[1].toLowerCase())){
+								pm.giveKit(lines[1].toLowerCase());
+							} else Functions.noPerm(p);
+						}
+						else if(allFolderKits.contains(lines[1])){
+							if(p.hasPermission("kitpvp." + lines[1].toLowerCase())){
+								InventoryStuff.setStuff(p, lines[1]);
+							} else Functions.noPerm(p);
+						}
+					} else Functions.tell(p, "§cYou don't have permission to use signs.");
+				}
 			}
+		}
 	}
 
 	@EventHandler
@@ -186,7 +173,7 @@ public class Signs implements Listener {
 				}
 			} else breakSign = true;
 			if(p.hasPermission("kitpvp.signs.kits.custom")){
-				if(allKits.contains(lines[1])){
+				if(allConfKits.contains(lines[1])){
 					e.setLine(0, prefix);
 					e.setLine(1, StringUtils.capitalize(lines[1]));
 					e.getBlock().getState().update();
@@ -195,7 +182,7 @@ public class Signs implements Listener {
 			if(!(lines[1].equalsIgnoreCase("archer") || lines[1].equalsIgnoreCase("tank")
 					|| lines[1].equalsIgnoreCase("pvp") || lines[1].equalsIgnoreCase("pyro")
 					|| lines[1].equalsIgnoreCase("medic") || lines[1].equalsIgnoreCase("cupid")
-					|| allKits.contains(lines[1]) || lines[1].equalsIgnoreCase("Full")
+					|| allConfKits.contains(lines[1]) || lines[1].equalsIgnoreCase("Full")
 					|| lines[1].equalsIgnoreCase("Soups") || lines[1].equalsIgnoreCase("FullSoup")
 					|| lines[1].equalsIgnoreCase("Refill"))){
 				breakSign = true;

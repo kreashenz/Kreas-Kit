@@ -24,14 +24,14 @@ public class SBManager {
 
 	public SBManager(KitPvP plugin){
 		this.plugin = plugin;
-
 		this.streakUtils = plugin.streakUtils;
 	}
 
 	public void setBoard(Player p){
-		if(hasTempScoreboard(p)){
+		if(hasBoard.contains(p.getName())){
 			Functions.tell(p, "§cYou already have a scoreboard up.");
 		} else {
+			hasBoard.add(p.getName());
 			ScoreboardManager manager = Bukkit.getScoreboardManager();
 			Scoreboard board = manager.getNewScoreboard();
 			Objective objective = board.registerNewObjective("dummy", "test");
@@ -42,36 +42,29 @@ public class SBManager {
 			a.setScore(streakUtils.getStreaks(p));
 
 			Score b = objective.getScore(Bukkit.getOfflinePlayer("§aKills"));
-			b.setScore(streakUtils.getHashKills(p));
+			b.setScore(streakUtils.getKills(p));
 
 			Score c = objective.getScore(Bukkit.getOfflinePlayer("§aDeaths"));
-			c.setScore(streakUtils.getHashDeaths(p));
+			c.setScore(streakUtils.getDeaths(p));
 
 			p.setScoreboard(board);
+
+			removeBoard(p);
 		}
 	}
 
 	public void removeTempScoreboard(Player p){
 		hasBoard.remove(p.getName());
-		p.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
+		p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
 	}
 
-	private boolean hasTempScoreboard(Player p){
-		if(hasBoard.contains(p.getName())){
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public void removeBoard(final Player p){
-		Bukkit.getScheduler().runTaskTimer(plugin, new BukkitRunnable(){
-			@Override
+	private void removeBoard(final Player p){
+		new BukkitRunnable(){
 			public void run(){
-				if(hasTempScoreboard(p)){
+				if(hasBoard.contains(p.getName())){
 					removeTempScoreboard(p);
 				}
 			}
-		}, 0L, plugin.getConfig().getInt("Scoreboard-Show-Time")*20);
+		}.runTaskLater(plugin, plugin.getConfig().getInt("Scoreboard-Show-Time")*20);
 	}
 }

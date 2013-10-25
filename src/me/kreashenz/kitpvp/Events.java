@@ -7,6 +7,7 @@ import java.util.List;
 
 import me.kreashenz.kitpvp.utils.Functions;
 import me.kreashenz.kitpvp.utils.KillstreakUtils;
+import me.kreashenz.kitpvp.utils.PManager;
 import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.Bukkit;
@@ -58,40 +59,41 @@ public class Events implements Listener {
 
 	@EventHandler
 	public void entityDeath(EntityDeathEvent e) {
-		if(e.getEntity() instanceof Player && e.getEntity().getKiller() instanceof Player){
+		if(e.getEntity() instanceof Player){
 			Player p = (Player)e.getEntity();
-			Player k = p.getKiller();
+			PManager pm = PManager.getPManager(p);
+			if(e.getEntity().getKiller() instanceof Player){
+				Player k = p.getKiller();
 
-			checkStreak(k);
+				checkStreak(k);
 
-			if (plugin.kits.whoHasAKit.contains(p.getName())){
-				Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.new-kit-permission")));
-				plugin.kits.whoHasAKit.remove(p.getName());
+				double perKill = plugin.getConfig().getDouble("Money-To-Give-Per-Kill");
+				EconomyResponse r = plugin.econ.depositPlayer(k.getName(), perKill);
+				if(r.transactionSuccess() && k!=null)Functions.tell(k, plugin.getConfig().getString("messages.killer-message-per-kill").replace("%p", p.getName()).replace("%amount%", "" + r.amount));
+
+				streakUtils.setStreaks(k, streakUtils.getStreaks(k) + 1);
+
+				streakUtils.setKills(k, streakUtils.getKills(k) + 1);
+
+				Functions.tell(k, plugin.getConfig().getString("messages.killer-message-on-streak").replace("%streak%", "" + streakUtils.getStreaks(p)));
+
+				if(plugin.getConfig().getBoolean("allow.dropsOnDeath") == false){
+					e.setDroppedExp(0);
+					e.getDrops().clear();
+				}
+
+				streakUtils.setStreaks(p, 0);
+				streakUtils.setDeaths(p, streakUtils.getDeaths(p) + 1);
+
 			}
-
-			if (plugin.kits.isInCupidKit.contains(p.getName())){
-				plugin.kits.isInCupidKit.remove(p.getName());
-			}
-
-			double perKill = plugin.getConfig().getDouble("Money-To-Give-Per-Kill");
-			EconomyResponse r = plugin.econ.depositPlayer(k.getName(), perKill);
-			if(r.transactionSuccess() && k!=null)Functions.tell(k, Functions.format(plugin.getConfig().getString("messages.killer-message-per-kill").replace("%p", p.getName()).replace("%amount%", "" + r.amount)));
-
-			streakUtils.setStreaks(p, 0);
-			streakUtils.setStreaks(k, streakUtils.getStreaks(k) + 1);
-
-			Functions.tell(k, Functions.format(plugin.getConfig().getString("messages.killer-message-on-streak").replace("%streak%", "" + streakUtils.getStreaks(p))));
-
-			if(plugin.getConfig().getBoolean("allow.dropsOnDeath") == false){
-				e.setDroppedExp(0);
-				e.getDrops().clear();
+			if (pm.hasKit()){
+				Functions.tell(p, plugin.getConfig().getString("messages.new-kit-permission"));
+				pm.removeKit();
 			}
 
 		}
 		if(e.getEntity() instanceof Horse){
-			Horse horse = (Horse)e.getEntity();
 			e.getDrops().clear();
-			horse.getWorld().createExplosion(horse.getLocation().getX(), horse.getLocation().getY(), horse.getLocation().getZ(), 0, false, false);
 		}
 	}
 
@@ -101,24 +103,24 @@ public class Events implements Listener {
 		case 3:
 			Functions.givePot(p, PotionEffectType.SPEED, 600, 0);
 			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-3-killstreak").replace("%p", p.getName())));
+			Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-3-killstreak").replace("%p", p.getName()));
 			EconomyResponse rf = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-3-KillStreak"));
-			if (rf.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-3-killstreak").replace("%amount%", "" + rf.amount).replace("%p", p.getName())));
+			if (rf.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-3-killstreak").replace("%amount%", "" + rf.amount).replace("%p", p.getName()));
 		case 5:
 			Functions.givePot(p, PotionEffectType.INCREASE_DAMAGE, 600, 0);
 			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-5-killstreak").replace("%p", p.getName())));
+			Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-5-killstreak").replace("%p", p.getName()));
 			EconomyResponse ra = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-5-KillStreak"));
-			if (ra.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-5-killstreak").replace("%amount%", "" + ra.amount).replace("%p", p.getName())));
+			if (ra.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-5-killstreak").replace("%amount%", "" + ra.amount).replace("%p", p.getName()));
 		case 7:
 			ItemStack a = new ItemStack(Material.SNOW_BALL, 3);
 			Functions.name(a, "§cGrenade");
 			pi.addItem(a);
 			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
 			Functions.tell(p, "§aEnjoy your rewards, use them wisely, though.");
-			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-7-killstreak").replace("%p", p.getName())));
+			Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-7-killstreak").replace("%p", p.getName()));
 			EconomyResponse rb = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-7-KillStreak"));
-			if (rb.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-7-killstreak").replace("%amount%", "" + rb.amount).replace("%p", p.getName())));
+			if (rb.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-7-killstreak").replace("%amount%", "" + rb.amount).replace("%p", p.getName()));
 		case 10:
 			ItemStack helm = pi.getHelmet();
 			ItemStack chest = pi.getChestplate();
@@ -135,10 +137,10 @@ public class Events implements Listener {
 			Functions.givePot(p, PotionEffectType.FAST_DIGGING, 600, 0);
 			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
 
-			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-10-killstreak").replace("%p", p.getName())));
+			Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-10-killstreak").replace("%p", p.getName()));
 
 			EconomyResponse rc = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-10-KillStreak"));
-			if (rc.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-10-killstreak").replace("%amount%", "" + rc.amount).replace("%p", p.getName())));
+			if (rc.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-10-killstreak").replace("%amount%", "" + rc.amount).replace("%p", p.getName()));
 
 		case 15:
 			Functions.givePot(p, PotionEffectType.DAMAGE_RESISTANCE, 20, 0);
@@ -154,26 +156,26 @@ public class Events implements Listener {
 			Functions.givePot(p, PotionEffectType.WATER_BREATHING, 20, 0);
 			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
 
-			Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-15-killstreak").replace("%p", p.getName())));
+			Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-15-killstreak").replace("%p", p.getName()));
 
 			EconomyResponse rd = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-15-KillStreak"));
-			if (rd.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-15-killstreak").replace("%amount%", "" + rd.amount).replace("%p", p.getName())));
+			if (rd.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-15-killstreak").replace("%amount%", "" + rd.amount).replace("%p", p.getName()));
 			break;
 		case 20:
-			if(plugin.kits.hasAKit(p)){
-				plugin.kits.whoHasAKit.remove(p.getName());
+			if(PManager.getPManager(p).hasKit()){
+				PManager.getPManager(p).removeKit();
 
 				pi.addItem(new ItemStack(Material.EGG, 5));
 				Functions.tell(p, "§6You have been given some §aFire Grenades§6!");
 
-				Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.new-kit-permission")));
+				Functions.tell(p, plugin.getConfig().getString("messages.new-kit-permission"));
 
 				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
 
-				Bukkit.broadcastMessage(Functions.format(plugin.getConfig().getString("messages.broadcast-20-killstreak").replace("%p", p.getName())));
+				Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-20-killstreak").replace("%p", p.getName()));
 
 				EconomyResponse re = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-20-KillStreak"));
-				if (re.transactionSuccess())Functions.tell(p, Functions.format(plugin.getConfig().getString("message.killer-message-on-20-killstreak").replace("%amount%", "" + re.amount).replace("%p", p.getName())));
+				if (re.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-20-killstreak").replace("%amount%", "" + re.amount).replace("%p", p.getName()));
 			}
 		}
 		if(streakUtils.getStreaks(p) > 20){
@@ -195,24 +197,16 @@ public class Events implements Listener {
 	@EventHandler
 	public void PlayerJoin(PlayerJoinEvent e){
 		Player p = e.getPlayer();
-		FileConfiguration a = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "stats.yml"));
+		FileConfiguration a = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "stats.yml"));
 		if(!a.contains(p.getName() + ".kills")){
 			a.set(p.getName() + ".kills", "0");
 			a.set(p.getName() + ".deaths", "0");
 			a.set(p.getName() + ".KDR", "0");
 			try {
-				a.save(new File(plugin.getDataFolder().getAbsolutePath() + File.separator + "stats.yml"));
+				a.save(new File(plugin.getDataFolder(), "stats.yml"));
 			} catch (IOException e1){
 				e1.printStackTrace();
 			}
-		}
-
-		if(!(streakUtils.deaths.containsKey(p.getName()))){
-			streakUtils.deaths.put(p.getName(), 0);
-		}
-
-		if(!(streakUtils.kills.containsKey(p.getName()))){
-			streakUtils.kills.put(p.getName(), 0);
 		}
 
 	}
@@ -265,7 +259,7 @@ public class Events implements Listener {
 					} else {
 						cooldown.add(p.getName());
 						p.setAllowFlight(true);
-						Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-use")));
+						Functions.tell(p, plugin.getConfig().getString("messages.cupid-feather-use"));
 					}
 					new BukkitRunnable(){
 						@Override
@@ -274,7 +268,7 @@ public class Events implements Listener {
 								p.setAllowFlight(true);
 							} else {
 								p.setAllowFlight(false);
-								Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-end")));
+								Functions.tell(p, plugin.getConfig().getString("messages.cupid-feather-end"));
 							}
 						}
 					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Length-Cupid-Kit")*20);
@@ -282,7 +276,7 @@ public class Events implements Listener {
 						@Override
 						public void run(){
 							cooldown.remove(p.getName());
-							Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.cupid-feather-canUse")));
+							Functions.tell(p, plugin.getConfig().getString("messages.cupid-feather-canUse"));
 						}
 					}.runTaskLater(plugin, plugin.getConfig().getInt("Fly-Cooldown-Cupid-Kit")*20);
 				}
@@ -345,10 +339,8 @@ public class Events implements Listener {
 		if(e.getEntity() instanceof Player){
 			Player p = (Player)e.getEntity();
 			if(e.getCause() == DamageCause.FALL){
-				if(plugin.kits.isInCupidKit.contains(p.getName())){
+				if(PManager.getPManager(p).getKit().equalsIgnoreCase("cupid")){
 					e.setCancelled(true);
-				} else {
-					e.setCancelled(false);
 				}
 			}
 		}
@@ -358,7 +350,7 @@ public class Events implements Listener {
 	public void onAssassinDisappear(PlayerMoveEvent e){
 		Player p = e.getPlayer();
 		for(Player ps : Bukkit.getOnlinePlayers()){
-			if(plugin.kit.assassin.contains(p.getName())){
+			if(PManager.getPManager(p).getKit().equalsIgnoreCase("assassin")){
 				if (!p.canSee(ps)) {
 					p.hidePlayer(ps);
 				}
@@ -382,11 +374,11 @@ public class Events implements Listener {
 		for(String str : plugin.getConfig().getStringList("kits")){
 			if(msg.equalsIgnoreCase(str)){
 				e.setCancelled(true);
-				if(!(plugin.kits.hasAKit(p))){
+				if(!(PManager.getPManager(p).hasKit())){
 					if(p.hasPermission("kitpvp." + msg)){
-						plugin.kits.giveKit(p, msg);
+						PManager.getPManager(p).giveKit(msg);
 					} else Functions.noPerm(p);
-				} else Functions.tell(p, Functions.format(plugin.getConfig().getString("messages.must-die-before-new-kit")));
+				} else Functions.tell(p, plugin.getConfig().getString("messages.must-die-before-new-kit"));
 			} else Functions.tell(p, "§cThat kit doesn't exist! Use §f/kitlist §cto check available kits!");
 		}
 	}

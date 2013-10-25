@@ -4,7 +4,6 @@ import java.util.logging.Level;
 
 import me.kreashenz.kitpvp.KitPvP;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +14,7 @@ import org.bukkit.potion.PotionEffectType;
 public class Functions {
 
 	public static void log(Level level, String msg){
-		Bukkit.getLogger().log(level, "[Kreas-Kits] " + msg);
+		KitPvP.getInstance().getLogger().log(level,  msg);
 	}
 
 	public static String format(String msg){
@@ -23,11 +22,11 @@ public class Functions {
 	}
 
 	public static void tell(Player p, String msg){
-		p.sendMessage(msg);
+		p.sendMessage(format(msg));
 	}
 
 	public static void noPerm(Player p){
-		tell(p, format(new KitPvP().getConfig().getString("messages.no-permission")));
+		tell(p, KitPvP.getInstance().getConfig().getString("messages.no-permission"));
 	}
 
 	public static ItemStack name(ItemStack item, String name){

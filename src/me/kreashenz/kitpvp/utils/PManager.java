@@ -1,11 +1,10 @@
-package me.kreashenz.kitpvp;
+package me.kreashenz.kitpvp.utils;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.logging.Level;
 
-import me.kreashenz.kitpvp.utils.Functions;
+import me.kreashenz.kitpvp.KitPvP;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,32 +16,52 @@ import org.bukkit.entity.Horse.Variant;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.HorseInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectTypeWrapper;
 
-public class KitManager {
+public class PManager {
 
+	private Player p;
+	private PlayerInventory pi;
+	private String name;
 	private KitPvP plugin;
 
-	public List<String> whoHasAKit = new ArrayList<String>();
-	public List<String> isInCupidKit = new ArrayList<String>();
+	private static HashMap<Player, PManager> manager = new HashMap<Player, PManager>();
+	private HashMap<String, String> kit = new HashMap<String, String>();
+	
+	private ItemStack helm;
+	private ItemStack chest;
+	private ItemStack legs;
+	private ItemStack boots;
+	private ItemStack sword;
 
-	public KitManager(KitPvP plugin) {
-		this.plugin = plugin;
+	private PManager(Player p){
+		this.p = p;
+		this.pi = p.getInventory();
+		this.name = p.getName();
+
+		this.plugin = KitPvP.getInstance();
+
 	}
 
-	public boolean hasAKit(Player p){
-		if(whoHasAKit.contains(p.getName())){
-			return true;
+	public static PManager getPManager(Player p){
+		if(manager.containsKey(p)){
+			return manager.get(p);
 		} else {
-			return false;
+			manager.put(p, new PManager(p));
+			return manager.get(p);
 		}
+	}
+	
+	public boolean hasKit(){
+		return (kit.containsKey(name) ? true : false);
 	}
 
 	@SuppressWarnings("deprecation")
-	public void giveKit(Player p, String kit){
+	public void giveKit(String kit){
 		FileConfiguration a = plugin.getConfig();
 		int slot;
 		for(slot = 0; slot<=35; slot++){
@@ -72,7 +91,7 @@ public class KitManager {
 						}
 					}
 				}
-				p.getInventory().setItem(slot, i);
+				pi.setItem(slot, i);
 			}
 		}
 
@@ -277,14 +296,155 @@ public class KitManager {
 				}
 			}
 		}
+		if(kit.equalsIgnoreCase("knight")){
+			pi = p.getInventory();
+			clear();
+			Functions.givePot(p, PotionEffectType.HEALTH_BOOST, 10, 3);
+			sword = Functions.name(new ItemStack(Material.IRON_HOE), "§9Iron Halberd");
+			this.helm = new ItemStack(Material.CHAINMAIL_HELMET);
+			this.chest = new ItemStack(Material.CHAINMAIL_CHESTPLATE);
+			this.legs = new ItemStack(Material.CHAINMAIL_LEGGINGS);
+			this.boots = new ItemStack(Material.CHAINMAIL_BOOTS);
+			pi.setArmorContents(new ItemStack[] {this.boots, this.legs, this.chest, this.helm});
+			pi.addItem(sword, new ItemStack(Material.BOW));
+			refill(32);
+			pi.addItem(new ItemStack(Material.ARROW, 64));
+			Horse horse = p.getWorld().spawn(p.getLocation(), Horse.class);
+			horse.setTamed(true);
+			horse.setOwner(p);
+			HorseInventory inv = horse.getInventory();
+			horse.setAdult();
+			horse.setVariant(Variant.HORSE);
+			horse.setPassenger(p);
+			inv.setArmor(new ItemStack(Material.IRON_BARDING));
+			inv.setSaddle(new ItemStack(Material.SADDLE));
+		}
+		else if(kit.equalsIgnoreCase("pyro")){
+			pi = p.getInventory();
+			clear();
+			Functions.givePot(p, PotionEffectType.FIRE_RESISTANCE, 999999999, 1);
+			sword = new ItemStack(Material.STONE_SWORD, 1);		
+			pi.setArmorContents(new ItemStack[] {new ItemStack(Material.IRON_BOOTS), new ItemStack(Material.IRON_LEGGINGS), new ItemStack(Material.IRON_CHESTPLATE), new ItemStack(Material.IRON_HELMET)});
+			pi.addItem(sword, Functions.name(new ItemStack(Material.TNT, 16), "§rBombs"));
+			refill(32);
+		} else if(kit.equalsIgnoreCase("pvp")){
+			pi = p.getInventory();
+			clear();
+			Functions.givePot(p, PotionEffectType.INCREASE_DAMAGE, 300, 0);
+			sword = new ItemStack(Material.DIAMOND_SWORD, 1);
+			sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
+			pi.setArmorContents(new ItemStack[] {new ItemStack(Material.IRON_BOOTS), new ItemStack(Material.IRON_LEGGINGS), new ItemStack(Material.IRON_CHESTPLATE), new ItemStack(Material.IRON_HELMET)});
+			pi.addItem(sword);
+			refill(34);
+		} else if(kit.equalsIgnoreCase("tank")){
+			pi = p.getInventory();
+			clear();
+			Functions.givePot(p, PotionEffectType.SLOW, 300, 2);
+			Functions.givePot(p, PotionEffectType.INCREASE_DAMAGE, 300, 0);
+			this.helm = new ItemStack(Material.DIAMOND_HELMET, 1);
+			this.chest = new ItemStack(Material.DIAMOND_CHESTPLATE, 1);
+			this.legs = new ItemStack(Material.DIAMOND_LEGGINGS, 1);
+			this.boots = new ItemStack(Material.DIAMOND_BOOTS, 1);
+			sword = new ItemStack(Material.IRON_SWORD, 1);
+			pi.setArmorContents(new ItemStack[] {this.boots, this.legs, this.chest, this.helm});
+			pi.addItem(sword);
+			refill(34);
+		} else if(kit.equalsIgnoreCase("medic")){
+			pi = p.getInventory();
+			clear();
+			sword = Functions.name(new ItemStack(Material.IRON_SWORD), "§rScalpel");
+			this.helm = setColour(new ItemStack(Material.LEATHER_HELMET), org.bukkit.Color.BLACK);
+			this.chest = setColour(new ItemStack(Material.LEATHER_CHESTPLATE), org.bukkit.Color.BLACK);
+			this.legs = setColour(new ItemStack(Material.LEATHER_LEGGINGS), org.bukkit.Color.BLACK);
+			this.boots = setColour(new ItemStack(Material.LEATHER_BOOTS), org.bukkit.Color.BLACK);
+			this.helm.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+			this.chest.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+			this.legs.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+			boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+			sword.addEnchantment(Enchantment.DAMAGE_ALL, 0);
+			sword.addEnchantment(Enchantment.KNOCKBACK, 1);
+			pi.addItem(sword);
+			pi.setArmorContents(new ItemStack[] {this.boots, this.legs, this.chest, this.helm});
+			refill(34);
+		} else if(kit.equalsIgnoreCase("archer")){
+			pi = p.getInventory();
+			clear();
+			Functions.givePot(p, PotionEffectType.FAST_DIGGING, 15*60, 0);
+			ItemStack bow = new ItemStack(Material.BOW);
+			bow.addEnchantment(Enchantment.ARROW_DAMAGE, 2);
+			bow.addEnchantment(Enchantment.ARROW_INFINITE, 1);
+			this.helm = new ItemStack(setColour(new ItemStack(Material.LEATHER_HELMET), org.bukkit.Color.RED));
+			this.chest = new ItemStack(setColour(new ItemStack(Material.LEATHER_CHESTPLATE), org.bukkit.Color.YELLOW));
+			this.legs = new ItemStack(setColour(new ItemStack(Material.LEATHER_LEGGINGS), org.bukkit.Color.BLUE));
+			this.boots = new ItemStack(setColour(new ItemStack(Material.LEATHER_BOOTS), org.bukkit.Color.PURPLE));
+			this.helm.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+			this.chest.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+			this.legs.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+			this.boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+			pi.setArmorContents(new ItemStack[] {this.boots, this.legs, this.chest, this.helm});
+			pi.addItem(bow);
+			refill(32);
+			pi.addItem(new ItemStack(Material.ARROW));
+		} else if(kit.equalsIgnoreCase("cupid")){
+			pi = p.getInventory();
+			clear();
+			Functions.givePot(p, PotionEffectType.JUMP, 15*20, 1);
+			ItemStack bow = new ItemStack(Material.BOW);
+			bow.addEnchantment(Enchantment.ARROW_INFINITE, 1);
+			sword = new ItemStack(Material.STONE_SWORD, 1);
+			pi.addItem(sword, bow, new ItemStack(Material.FEATHER, 1));
+			refill(29);
+			pi.addItem(new ItemStack(Material.ARROW));
+		} else if(kit.equalsIgnoreCase("assassin")){
+			pi = p.getInventory();
+			clear();
+			Functions.givePot(p, PotionEffectType.FAST_DIGGING, 300, 2);
+			Functions.givePot(p, PotionEffectType.SPEED, 300, 4);
+			sword = new ItemStack(Material.IRON_SWORD, 1);
+			this.helm = new ItemStack(Material.CHAINMAIL_HELMET, 1);
+			this.chest = new ItemStack(Material.GOLD_CHESTPLATE, 1);
+			this.legs = new ItemStack(Material.GOLD_LEGGINGS, 1);
+			this.boots = new ItemStack(Material.CHAINMAIL_BOOTS, 1);
+			this.boots.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 9);
+			pi.setArmorContents(new ItemStack[] {this.boots, this.legs, this.chest, this.helm});
+			pi.addItem(sword);
+			refill(33);
+		}
+		this.kit.put(p.getName(), kit);
 		p.updateInventory();
 	}
 
-	private ItemStack setColour(ItemStack item, int colour){
+	private ItemStack setColour(ItemStack item, int color){
 		LeatherArmorMeta im = (LeatherArmorMeta) item.getItemMeta();
-		im.setColor(org.bukkit.Color.fromRGB(colour));
+		im.setColor(org.bukkit.Color.fromRGB(color));
 		item.setItemMeta(im);
 		return item;
+	}
+	
+	private ItemStack setColour(ItemStack item, org.bukkit.Color color){
+		LeatherArmorMeta im = (LeatherArmorMeta) item.getItemMeta();
+		im.setColor(color);
+		item.setItemMeta(im);
+		return item;
+	}
+
+	private void clear(){
+		p.getInventory().clear();
+		p.getInventory().setArmorContents(null);
+		for(PotionEffect effect : p.getActivePotionEffects())p.removePotionEffect(effect.getType());
+	}
+	
+	private void refill(int amount){
+		pi = p.getInventory();
+		for(int i = 1; i <= amount; i++)pi.addItem(new ItemStack(Material.MUSHROOM_SOUP));
+	}
+
+	public void removeKit() {
+		this.kit.remove(name);
+	}
+	
+	public String getKit(){
+		return (kit.containsKey(name) ? kit.get(name) : null);
 	}
 
 }

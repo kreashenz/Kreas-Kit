@@ -15,7 +15,6 @@ import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -26,21 +25,16 @@ public class KitPvP extends JavaPlugin {
 
 	public Economy econ = null;
 
-	public KitManager kits;
-	public Kits kit;
 	public KillstreakUtils streakUtils;
 	public SBManager sb;
 
 	@Override
 	public void onEnable() {
-
 		instance = this;
 
-		String path = getDataFolder().getAbsolutePath() + File.separator + "stats.yml";
+		File file = new File(getDataFolder(), "stats.yml");
 
-		File file = new File(path);
-
-		if(!new File(getDataFolder().getAbsolutePath() + File.separator + "README-Update.txt").exists()){
+		if(!new File(getDataFolder(), "README-Update.txt").exists()){
 			saveResource("README-Update.txt", false);
 		}
 
@@ -55,13 +49,11 @@ public class KitPvP extends JavaPlugin {
 
 		saveDefaultConfig();
 
-		streakUtils = new KillstreakUtils(this);
-		kits = new KitManager(this);
-		kit = new Kits();
+		streakUtils = new KillstreakUtils();
 		sb = new SBManager(this);
 
 		listener(new Events(this));
-		listener(new Signs(this));
+		listener(new Signs());
 
 		command("stats");
 		command("pyro");
@@ -90,14 +82,15 @@ public class KitPvP extends JavaPlugin {
 		runStatsSaveTimer();
 
 		for (String kits : getConfig().getStringList("Kits"))getLogger().info("Successfully registered kit: " + kits);
+
 	}
 
 	private void checkForOldConfig(){
 		if(getConfig().getDouble("version") != Double.valueOf(getDescription().getVersion()) || (!(getConfig().contains("version")))){
 
 			try {
-				File old = new File(getDataFolder().getAbsolutePath() + File.separator + "config.yml.old");
-				File mew = new File(getDataFolder().getAbsolutePath() + File.separator + "config.yml");
+				File old = new File(getDataFolder(), "config.yml.old");
+				File mew = new File(getDataFolder(), "config.yml");
 
 				InputStream in = new FileInputStream(mew);
 				OutputStream out = new FileOutputStream(old);
@@ -126,8 +119,7 @@ public class KitPvP extends JavaPlugin {
 	}
 
 	private void listener(Listener listener){
-		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvents(listener, this);
+		getServer().getPluginManager().registerEvents(listener, this);
 	}
 
 	private void setupVault() {
@@ -136,12 +128,8 @@ public class KitPvP extends JavaPlugin {
 			Functions.log(Level.INFO, "Loaded Vault v" + vault.getDescription().getVersion());
 			if (!setupEconomy()) {
 				Functions.log(Level.WARNING, "No economy plugin installed.");
-			} else {
-				Functions.log(Level.INFO, "Found economy.");
-			}
-		} else {
-			Functions.log(Level.WARNING, "Vault not loaded, please check your plugins folder or console.");
-		}
+			} else Functions.log(Level.INFO, "Found economy.");
+		} else Functions.log(Level.WARNING, "Vault not loaded, please check your plugins folder or console.");
 	}
 
 	private boolean setupEconomy(){
