@@ -3,6 +3,7 @@ package me.kreashenz.kitpvp;
 import java.io.File;
 
 import me.kreashenz.kitpvp.utils.Functions;
+import me.kreashenz.kitpvp.utils.InventoryStuff;
 import me.kreashenz.kitpvp.utils.PManager;
 
 import org.bukkit.Bukkit;
@@ -118,7 +119,7 @@ public class Commands implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("kitlist")){
 				if(p.hasPermission("kitpvp.list")){
 					String str = "";
-					for(String st : plugin.getConfig().getConfigurationSection("Kits").getKeys(false)){
+					for(String st : plugin.getAllKits()){
 						if(p.hasPermission("kitpvp." + st)){
 							st = "§a" + st + "§f";
 						} else {
@@ -139,18 +140,39 @@ public class Commands implements CommandExecutor {
 						Functions.tell(p, "§7|| §6Kills §1: §a" + file.getInt(p.getName() + ".kills"));
 						Functions.tell(p, "§7|| §6Deaths §1: §a" + file.getInt(p.getName() + ".deaths"));
 						Functions.tell(p, "§7+§c--------------------------------------§c+");
-						if(!plugin.sb.hasBoard.contains(p.getName())){
-							plugin.sb.setBoard(p);
-							Functions.tell(p, "§aShowing your stats. Board will remove in" + plugin.getConfig().getInt("Scoreboard-Show-Time") + " seconds.");
-						} else Functions.tell(p, "§cYou already have a scoreboard up!");
 					} else {
 						Player t = Bukkit.getPlayer(args[0]);
-						if(t.isOnline() && t != null){
+						if(t != null){
 							Functions.tell(p, "§7+§c--------------------------------------§c+");
 							Functions.tell(p, "§7|| §6Kills §1: §a" + file.getInt(t.getName() + ".kills"));
 							Functions.tell(p, "§7|| §6Deaths §1: §a" + file.getInt(t.getName() + ".deaths"));
 							Functions.tell(p, "§7+§c--------------------------------------§c+");
 						} else Functions.tell(p, "§cThat player cannot be found, please try again.");
+					}
+				} else Functions.noPerm(p);
+			}
+			if(cmd.getName().equalsIgnoreCase("createkit")){
+				if(p.hasPermission("kitpvp.createkit")){
+					if(args.length == 0){
+						Functions.tell(p, "§cInvalid arguments. Usage §f/createkit <kit>");
+					} else {
+						if(!InventoryStuff.kitExists(args[0])){
+							InventoryStuff.saveInventory(p.getInventory(), args[0]);
+							Functions.tell(p, "§7Successfully saved your inventory to create the §6" + args[0] + " §7kit.");
+							InventoryStuff.addKit(args[0]);
+						} else Functions.tell(p, "§cKit already exists.");
+					}
+				} else Functions.noPerm(p);
+			}
+			if(cmd.getName().equalsIgnoreCase("deletekit")){
+				if(p.hasPermission("kitpvp.deletekit")){
+					if(args.length == 0){
+						Functions.tell(p, "§cInvalid arguments. §f/deletekit <kit>");
+					} else {
+						if(InventoryStuff.kitExists(args[0])){
+							InventoryStuff.deleteKit(args[0]);
+							Functions.tell(p, "§7Successfully deleted the §6 " + args[0] + " §7kit.");
+						} else Functions.tell(p, "§cUnknown kit");
 					}
 				} else Functions.noPerm(p);
 			}

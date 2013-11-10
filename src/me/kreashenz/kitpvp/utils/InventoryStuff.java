@@ -24,6 +24,8 @@ public class InventoryStuff {
 
 	private static File folder;
 
+	private static List<String> all = new ArrayList<String>();
+
 	static {
 		plugin = KitPvP.getInstance();
 		folder = new File(plugin.getDataFolder() + File.separator + "kits");
@@ -31,14 +33,38 @@ public class InventoryStuff {
 		if(!folder.exists())folder.mkdir();
 	}
 
+	public static void loadKits(){
+		for(String str : getAllKits()){
+			all.add(str);
+		}
+	}
+
+	public static void addKit(String kit){
+		all.add(kit);
+		loadKits();
+	}
+
+	public static void deleteKit(String kit){
+		all.remove(kit);
+		for(File f : folder.listFiles()){
+			String name = f.getName().replace(".yml", "");
+			if(name.equalsIgnoreCase(kit)){
+				f.delete();
+				loadKits();
+			}
+		}
+	}
+
 	public static List<String> getAllKits(){
 		List<String> kits = new ArrayList<String>();
 		for(File file : folder.listFiles()){
 			if(!(file.getName().startsWith("."))){
 				String name = file.getName().replace(".yml", "");
-
 				kits.add(name);
 			}
+		}
+		for(String str : plugin.getConfig().getConfigurationSection("Kits").getKeys(false)){
+			kits.add(str);
 		}
 		return kits;
 	}
@@ -53,7 +79,7 @@ public class InventoryStuff {
 		p.addPotionEffects(getPotionEffects(file));
 	}
 
-	public static Collection<PotionEffect> getPotionEffects(String file){
+	private static Collection<PotionEffect> getPotionEffects(String file){
 		if(file == null) return null;
 		Collection<PotionEffect> pots = new HashSet<PotionEffect>();
 
@@ -71,7 +97,7 @@ public class InventoryStuff {
 		return pots;
 	}
 
-	public static ItemStack[] getArmorContents(String file){
+	private static ItemStack[] getArmorContents(String file){
 		if(file == null) return null;
 		ItemStack[] items = null;
 
@@ -89,7 +115,7 @@ public class InventoryStuff {
 		return items;
 	}
 
-	public static ItemStack[] getInventory(String file){
+	private static ItemStack[] getInventory(String file){
 		if(file == null) return null;
 		ItemStack[] items = null;
 
@@ -108,7 +134,7 @@ public class InventoryStuff {
 	}
 
 	public static boolean saveInventory(PlayerInventory inv, String fileName){
-		if(inv == null || fileName == "") return false;
+		if(inv == null || fileName == "" || fileName.contains("[a-zA-Z_0-9]")) return false;
 		File file = new File(folder, fileName + ".yml");
 		if(file.exists()) file.delete();
 		FileConfiguration conf = YamlConfiguration.loadConfiguration(file);
@@ -126,7 +152,7 @@ public class InventoryStuff {
 			if(item != null) if(item.getType() != Material.AIR) conf.set("ArmorSlot." + i, item);
 		}
 
-		for(PotionEffect pot : ((Player)inv.getHolder()).getActivePotionEffects()){
+		for(PotionEffect pot : inv.getHolder().getActivePotionEffects()){
 			conf.set("PotionEffects." + pot.getType().getName() + ".level", pot.getAmplifier());
 			conf.set("PotionEffects." + pot.getType().getName() + ".duration", pot.getDuration());
 		}

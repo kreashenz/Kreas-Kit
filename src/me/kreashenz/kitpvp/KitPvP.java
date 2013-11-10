@@ -1,18 +1,19 @@
 package me.kreashenz.kitpvp;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import me.kreashenz.kitpvp.metrics.Metrics;
 import me.kreashenz.kitpvp.utils.Functions;
+import me.kreashenz.kitpvp.utils.InventoryStuff;
 import me.kreashenz.kitpvp.utils.KillstreakUtils;
 import net.milkbowl.vault.economy.Economy;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -26,17 +27,14 @@ public class KitPvP extends JavaPlugin {
 	public Economy econ = null;
 
 	public KillstreakUtils streakUtils;
-	public SBManager sb;
+
+	public List<String> assassinList = new ArrayList<String>();
 
 	@Override
 	public void onEnable() {
 		instance = this;
 
 		File file = new File(getDataFolder(), "stats.yml");
-
-		if(!new File(getDataFolder(), "README-Update.txt").exists()){
-			saveResource("README-Update.txt", false);
-		}
 
 		if(!(file.exists())){
 			try {
@@ -50,7 +48,6 @@ public class KitPvP extends JavaPlugin {
 		saveDefaultConfig();
 
 		streakUtils = new KillstreakUtils();
-		sb = new SBManager(this);
 
 		listener(new Events(this));
 		listener(new Signs());
@@ -77,41 +74,11 @@ public class KitPvP extends JavaPlugin {
 			e.printStackTrace();
 		}
 
-		checkForOldConfig();
-
 		runStatsSaveTimer();
+		runAssassinTimer();
 
-		for (String kits : getConfig().getStringList("Kits"))getLogger().info("Successfully registered kit: " + kits);
+		for (String kits : getAllKits())getLogger().info("Successfully registered kit: " + kits);
 
-	}
-
-	private void checkForOldConfig(){
-		if(getConfig().getDouble("version") != Double.valueOf(getDescription().getVersion()) || (!(getConfig().contains("version")))){
-
-			try {
-				File old = new File(getDataFolder(), "config.yml.old");
-				File mew = new File(getDataFolder(), "config.yml");
-
-				InputStream in = new FileInputStream(mew);
-				OutputStream out = new FileOutputStream(old);
-
-				byte[] buff = new byte[1024];
-
-				int length;
-
-				while((length = in.read(buff)) > 0)out.write(buff, 0, length);
-
-				in.close();
-				out.close();
-
-				mew.delete();
-
-				saveDefaultConfig();
-
-			} catch(IOException e){
-				e.printStackTrace();
-			}
-		}
 	}
 
 	private void command(String cmd){
@@ -152,9 +119,40 @@ public class KitPvP extends JavaPlugin {
 			}
 		}, 0L, getConfig().getInt("config-save-delay")*20);
 	}
+	
+	private void runAssassinTimer(){
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new BukkitRunnable(){
+			public void run(){
+				for(String str : assassinList){
+					Player p = Bukkit.getPlayerExact(str);
+					if(p != null){
+						for(Player ps : Bukkit.getOnlinePlayers()){
+							int distance = (int)p.getLocation().distance(ps.getLocation());
+							if(distance < 13){
+								ps.showPlayer(p);
+							} else {
+								ps.hidePlayer(p);
+							}
+						}
+					}
+				}
+			}
+		}, 0L, 20L);
+	}
 
 	public static KitPvP getInstance(){
 		return instance;
+	}
+	
+	public List<String> getAllKits(){
+		List<String> all = new ArrayList<String>();
+		for(String str : getConfig().getConfigurationSection("Kits").getKeys(false)){
+			all.add(str);
+		}
+		for(String str : InventoryStuff.getAllKits()){
+			all.add(str);
+		}
+		return all;
 	}
 
 }

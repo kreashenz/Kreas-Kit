@@ -1,6 +1,6 @@
 # If you want to use horses in the config, please read the README-Update file. Thanks!
 
-version: 2.2 # Don't edit this, it will cause Kreas-Kits to break!
+version: 2.2.1 # Don't edit this, it will cause Kreas-Kits to break!
 
 config-save-delay: 60
 

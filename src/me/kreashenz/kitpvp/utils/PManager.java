@@ -31,7 +31,7 @@ public class PManager {
 
 	private static HashMap<Player, PManager> manager = new HashMap<Player, PManager>();
 	private HashMap<String, String> kit = new HashMap<String, String>();
-	
+
 	private ItemStack helm;
 	private ItemStack chest;
 	private ItemStack legs;
@@ -44,7 +44,6 @@ public class PManager {
 		this.name = p.getName();
 
 		this.plugin = KitPvP.getInstance();
-
 	}
 
 	public static PManager getPManager(Player p){
@@ -55,7 +54,11 @@ public class PManager {
 			return manager.get(p);
 		}
 	}
-	
+
+	public void releaseManager(){
+		manager.remove(p);
+	}
+
 	public boolean hasKit(){
 		return (kit.containsKey(name) ? true : false);
 	}
@@ -64,11 +67,10 @@ public class PManager {
 	public void giveKit(String kit){
 		FileConfiguration a = plugin.getConfig();
 		int slot;
-		for(slot = 0; slot<=35; slot++){
+		for(slot = 0; slot <= 35; slot++){
 			ItemStack i = new ItemStack(0);
 			String aSlot = a.getString("Kits." + kit + ".items." + slot);
-			if (a.contains(aSlot) &&
-					!aSlot.equals("0") && !aSlot.equals("")) {
+			if (a.contains(aSlot) && !aSlot.equals("0") && !aSlot.equals("")) {
 				String[] s = aSlot.split(" ");
 				String[] item = s[0].split(":");
 				i.setTypeId(Integer.parseInt(item[0]));
@@ -409,7 +411,9 @@ public class PManager {
 			pi.setArmorContents(new ItemStack[] {this.boots, this.legs, this.chest, this.helm});
 			pi.addItem(sword);
 			refill(33);
+			plugin.assassinList.add(name);
 		}
+		Functions.tell(p, "§7You chose the §6" + kit + "§7 kit!");
 		this.kit.put(p.getName(), kit);
 		p.updateInventory();
 	}
@@ -420,7 +424,7 @@ public class PManager {
 		item.setItemMeta(im);
 		return item;
 	}
-	
+
 	private ItemStack setColour(ItemStack item, org.bukkit.Color color){
 		LeatherArmorMeta im = (LeatherArmorMeta) item.getItemMeta();
 		im.setColor(color);
@@ -433,7 +437,7 @@ public class PManager {
 		p.getInventory().setArmorContents(null);
 		for(PotionEffect effect : p.getActivePotionEffects())p.removePotionEffect(effect.getType());
 	}
-	
+
 	private void refill(int amount){
 		pi = p.getInventory();
 		for(int i = 1; i <= amount; i++)pi.addItem(new ItemStack(Material.MUSHROOM_SOUP));
@@ -442,7 +446,7 @@ public class PManager {
 	public void removeKit() {
 		this.kit.remove(name);
 	}
-	
+
 	public String getKit(){
 		return (kit.containsKey(name) ? kit.get(name) : null);
 	}

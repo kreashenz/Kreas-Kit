@@ -29,11 +29,7 @@ public class KillstreakUtils {
 	}
 
 	public int getStreaks(Player p){
-		if(streak.containsKey(p.getName())){
-			return streak.get(p.getName());
-		} else {
-			return 0;
-		}
+		return (streak.containsKey(p.getName()) ? streak.get(p.getName()) : 0);
 	}
 
 	public void setKills(Player p, int kills){
@@ -53,6 +49,23 @@ public class KillstreakUtils {
 	public int getKills(Player p){
 		return getConfig().getInt(p.getName() + ".kills");
 	}
+	
+	public double getKDR(Player p){
+		int kills = getKills(p);
+		int deaths = getDeaths(p);
+		int kdr = something(kills, deaths);
+		if(kdr != 0){
+			kills = kills/kdr;
+			deaths = deaths/kdr;
+		}
+		double ratio = Math.round(((double)kills/(double)deaths) * 100D) / 100D;
+		if(kills == 0){
+			ratio = 0.0;
+		} else if(deaths == 0){
+			ratio = kills;
+		}
+		return ratio;
+	}
 
 	public void save(){
 		try {
@@ -64,6 +77,11 @@ public class KillstreakUtils {
 
 	private FileConfiguration getConfig(){
 		return YamlConfiguration.loadConfiguration(new File(KitPvP.getInstance().getDataFolder(), "stats.yml"));
+	}
+	
+	private int something(int a, int b){
+		if (b==0) return a;
+		return something(b,a % b);
 	}
 
 }

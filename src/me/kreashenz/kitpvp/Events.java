@@ -21,7 +21,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.entity.TNTPrimed;
@@ -38,7 +37,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -62,14 +60,14 @@ public class Events implements Listener {
 		if(e.getEntity() instanceof Player){
 			Player p = (Player)e.getEntity();
 			PManager pm = PManager.getPManager(p);
-			if(e.getEntity().getKiller() instanceof Player){
+			if(e.getEntity().getKiller() != null && e.getEntity().getKiller() instanceof Player){
 				Player k = p.getKiller();
 
 				checkStreak(k);
 
 				double perKill = plugin.getConfig().getDouble("Money-To-Give-Per-Kill");
 				EconomyResponse r = plugin.econ.depositPlayer(k.getName(), perKill);
-				if(r.transactionSuccess() && k!=null)Functions.tell(k, plugin.getConfig().getString("messages.killer-message-per-kill").replace("%p", p.getName()).replace("%amount%", "" + r.amount));
+				if(r.transactionSuccess())Functions.tell(k, plugin.getConfig().getString("messages.killer-message-per-kill").replace("%p", p.getName()).replace("%amount%", "" + r.amount));
 
 				streakUtils.setStreaks(k, streakUtils.getStreaks(k) + 1);
 
@@ -131,17 +129,12 @@ public class Events implements Listener {
 			legs.setDurability(legs.getType().getMaxDurability());
 			boots.setDurability(boots.getType().getMaxDurability());
 			pi.setArmorContents(new ItemStack[] {helm, chest, legs, boots});
-
 			Functions.tell(p, plugin.getConfig().getString("messages.reward-message-10-streak"));
-
 			Functions.givePot(p, PotionEffectType.FAST_DIGGING, 600, 0);
 			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-
 			Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-10-killstreak").replace("%p", p.getName()));
-
 			EconomyResponse rc = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-10-KillStreak"));
 			if (rc.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-10-killstreak").replace("%amount%", "" + rc.amount).replace("%p", p.getName()));
-
 		case 15:
 			Functions.givePot(p, PotionEffectType.DAMAGE_RESISTANCE, 20, 0);
 			Functions.givePot(p, PotionEffectType.FAST_DIGGING, 20, 0);
@@ -155,9 +148,7 @@ public class Events implements Listener {
 			Functions.givePot(p, PotionEffectType.SPEED, 20, 0);
 			Functions.givePot(p, PotionEffectType.WATER_BREATHING, 20, 0);
 			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-
 			Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-15-killstreak").replace("%p", p.getName()));
-
 			EconomyResponse rd = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-15-KillStreak"));
 			if (rd.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-15-killstreak").replace("%amount%", "" + rd.amount).replace("%p", p.getName()));
 			break;
@@ -330,8 +321,9 @@ public class Events implements Listener {
 
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent e){
-		Player player = e.getPlayer();
-		streakUtils.setStreaks(player, 0);
+		Player p = e.getPlayer();
+		streakUtils.setStreaks(p, 0);
+		PManager.getPManager(p).releaseManager();
 	}
 
 	@EventHandler
@@ -347,31 +339,10 @@ public class Events implements Listener {
 	}
 
 	@EventHandler
-	public void onAssassinDisappear(PlayerMoveEvent e){
-		Player p = e.getPlayer();
-		for(Player ps : Bukkit.getOnlinePlayers()){
-			if(PManager.getPManager(p).getKit().equalsIgnoreCase("assassin")){
-				if (!p.canSee(ps)) {
-					p.hidePlayer(ps);
-				}
-			}
-		}
-		for(Entity ents : p.getNearbyEntities(13, 13, 13)){
-			if(ents instanceof LivingEntity && ents instanceof Player){
-				Player ps = (Player)ents;
-				if (!p.canSee(ps)) {
-					p.hidePlayer(ps);
-				}
-			}
-		}
-	}
-
-	@EventHandler
 	public void onCommandPreProcess(PlayerCommandPreprocessEvent e){
 		Player p = e.getPlayer();
 		String msg = e.getMessage().split(" ")[0].replace("/", "").toLowerCase();
-
-		for(String str : plugin.getConfig().getStringList("kits")){
+		for(String str : plugin.getAllKits()){
 			if(msg.equalsIgnoreCase(str)){
 				e.setCancelled(true);
 				if(!(PManager.getPManager(p).hasKit())){
