@@ -67,7 +67,7 @@ public class Commands implements CommandExecutor {
 						}
 					}
 					if (!gotBowl) {
-						Functions.tell(p, "§cYou have no empty bowls!");
+						Functions.tell(p, "Â§cYou have no empty bowls!");
 						return true; 
 					}
 					return true;
@@ -106,13 +106,13 @@ public class Commands implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("kkit")){
 				if(p.hasPermission("kitpvp.admin")){
 					if(args.length != 1){
-						Functions.tell(p, "§cInvalid usage. §f/kkit <reload | save>");
+						Functions.tell(p, "Â§cInvalid usage. Â§f/kkit <reload | save>");
 					} else {
 						if(args[0].equalsIgnoreCase("save")){
 							plugin.saveConfig();
 						} else if(args[0].equalsIgnoreCase("reload")){
 							plugin.reloadConfig();
-						} else Functions.tell(p, "§cInvalid usage. §f/kkit <reload | save>");
+						} else Functions.tell(p, "Â§cInvalid usage. Â§f/kkit <reload | save>");
 					}
 				} else Functions.noPerm(p);
 			}
@@ -121,14 +121,14 @@ public class Commands implements CommandExecutor {
 					String str = "";
 					for(String st : plugin.getAllKits()){
 						if(p.hasPermission("kitpvp." + st)){
-							st = "§a" + st + "§f";
+							st = "Â§a" + st + "Â§f";
 						} else {
-							st = "§c" + st + "§f";
+							st = "Â§c" + st + "Â§f";
 						}
 						str = str + st + ", ";
 					}
 					str = str.substring(0, str.length()-2);
-					Functions.tell(p, "§8You can use the §agreen §8.");
+					Functions.tell(p, "Â§8You can use the Â§agreen Â§8.");
 					Functions.tell(p, str);
 				} else Functions.noPerm(p);
 			}
@@ -136,47 +136,47 @@ public class Commands implements CommandExecutor {
 				if(p.hasPermission("kitpvp.stats")){
 					FileConfiguration file = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "stats.yml"));
 					if(args.length == 0){
-						Functions.tell(p, "§7+§c--------------------------------------§c+");
-						Functions.tell(p, "§7|| §6Kills §1: §a" + file.getInt(p.getName() + ".kills"));
-						Functions.tell(p, "§7|| §6Deaths §1: §a" + file.getInt(p.getName() + ".deaths"));
-						Functions.tell(p, "§7+§c--------------------------------------§c+");
+						Functions.tell(p, "Â§7+Â§c--------------------------------------Â§c+");
+						Functions.tell(p, "Â§7|| Â§6Kills Â§1: Â§a" + file.getInt(p.getName() + ".kills"));
+						Functions.tell(p, "Â§7|| Â§6Deaths Â§1: Â§a" + file.getInt(p.getName() + ".deaths"));
+						Functions.tell(p, "Â§7+Â§c--------------------------------------Â§c+");
 					} else {
 						Player t = Bukkit.getPlayer(args[0]);
 						if(t != null){
-							Functions.tell(p, "§7+§c--------------------------------------§c+");
-							Functions.tell(p, "§7|| §6Kills §1: §a" + file.getInt(t.getName() + ".kills"));
-							Functions.tell(p, "§7|| §6Deaths §1: §a" + file.getInt(t.getName() + ".deaths"));
-							Functions.tell(p, "§7+§c--------------------------------------§c+");
-						} else Functions.tell(p, "§cThat player cannot be found, please try again.");
+							Functions.tell(p, "Â§7+Â§c--------------------------------------Â§c+");
+							Functions.tell(p, "Â§7|| Â§6Kills Â§1: Â§a" + file.getInt(t.getName() + ".kills"));
+							Functions.tell(p, "Â§7|| Â§6Deaths Â§1: Â§a" + file.getInt(t.getName() + ".deaths"));
+							Functions.tell(p, "Â§7+Â§c--------------------------------------Â§c+");
+						} else Functions.tell(p, "Â§cThat player cannot be found, please try again.");
 					}
 				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("createkit")){
 				if(p.hasPermission("kitpvp.createkit")){
 					if(args.length == 0){
-						Functions.tell(p, "§cInvalid arguments. Usage §f/createkit <kit>");
+						Functions.tell(p, "Â§cInvalid arguments. Usage Â§f/createkit <kit>");
 					} else {
 						if(!InventoryStuff.kitExists(args[0])){
 							InventoryStuff.saveInventory(p.getInventory(), args[0]);
-							Functions.tell(p, "§7Successfully saved your inventory to create the §6" + args[0] + " §7kit.");
+							Functions.tell(p, "Â§7Successfully saved your inventory to create the Â§6" + args[0] + " Â§7kit.");
 							InventoryStuff.addKit(args[0]);
-						} else Functions.tell(p, "§cKit already exists.");
+						} else Functions.tell(p, "Â§cKit already exists.");
 					}
 				} else Functions.noPerm(p);
 			}
 			if(cmd.getName().equalsIgnoreCase("deletekit")){
 				if(p.hasPermission("kitpvp.deletekit")){
 					if(args.length == 0){
-						Functions.tell(p, "§cInvalid arguments. §f/deletekit <kit>");
+						Functions.tell(p, "Â§cInvalid arguments. Â§f/deletekit <kit>");
 					} else {
 						if(InventoryStuff.kitExists(args[0])){
 							InventoryStuff.deleteKit(args[0]);
-							Functions.tell(p, "§7Successfully deleted the §6 " + args[0] + " §7kit.");
-						} else Functions.tell(p, "§cUnknown kit");
+							Functions.tell(p, "Â§7Successfully deleted the Â§6 " + args[0] + " Â§7kit.");
+						} else Functions.tell(p, "Â§cUnknown kit");
 					}
 				} else Functions.noPerm(p);
 			}
-		} else s.sendMessage("§cYou must be a player to use these commands.");
+		} else s.sendMessage("Â§cYou must be a player to use these commands.");
 		return true;
 	}
 

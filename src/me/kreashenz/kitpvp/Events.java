@@ -112,10 +112,10 @@ public class Events implements Listener {
 			if (ra.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-5-killstreak").replace("%amount%", "" + ra.amount).replace("%p", p.getName()));
 		case 7:
 			ItemStack a = new ItemStack(Material.SNOW_BALL, 3);
-			Functions.name(a, "§cGrenade");
+			Functions.name(a, "Â§cGrenade");
 			pi.addItem(a);
 			p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-			Functions.tell(p, "§aEnjoy your rewards, use them wisely, though.");
+			Functions.tell(p, "Â§aEnjoy your rewards, use them wisely, though.");
 			Bukkit.broadcastMessage(plugin.getConfig().getString("messages.broadcast-7-killstreak").replace("%p", p.getName()));
 			EconomyResponse rb = plugin.econ.depositPlayer(p.getName(), plugin.getConfig().getInt("Money-To-Give-On-7-KillStreak"));
 			if (rb.transactionSuccess())Functions.tell(p, plugin.getConfig().getString("message.killer-message-on-7-killstreak").replace("%amount%", "" + rb.amount).replace("%p", p.getName()));
@@ -157,7 +157,7 @@ public class Events implements Listener {
 				PManager.getPManager(p).removeKit();
 
 				pi.addItem(new ItemStack(Material.EGG, 5));
-				Functions.tell(p, "§6You have been given some §aFire Grenades§6!");
+				Functions.tell(p, "Â§6You have been given some Â§aFire GrenadesÂ§6!");
 
 				Functions.tell(p, plugin.getConfig().getString("messages.new-kit-permission"));
 
@@ -246,7 +246,7 @@ public class Events implements Listener {
 			if(p.getItemInHand().getType() == Material.FEATHER){
 				if(!cooldown.contains(p.getName())){
 					if(p.getGameMode() == GameMode.CREATIVE){
-						Functions.tell(p, "§cYou are already in fly mode, silly :)");
+						Functions.tell(p, "Â§cYou are already in fly mode, silly :)");
 					} else {
 						cooldown.add(p.getName());
 						p.setAllowFlight(true);
@@ -350,7 +350,7 @@ public class Events implements Listener {
 						PManager.getPManager(p).giveKit(msg);
 					} else Functions.noPerm(p);
 				} else Functions.tell(p, plugin.getConfig().getString("messages.must-die-before-new-kit"));
-			} else Functions.tell(p, "§cThat kit doesn't exist! Use §f/kitlist §cto check available kits!");
+			} else Functions.tell(p, "Â§cThat kit doesn't exist! Use Â§f/kitlist Â§cto check available kits!");
 		}
 	}
 
