@@ -21,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class Signs implements Listener {
 
-	private String prefix = "§1[Kreas-Kits]";
+	private String prefix = "Â§1[Kreas-Kits]";
 
 	private Set<String> allConfKits;
 	private Set<String> allFolderKits;
@@ -51,7 +51,7 @@ public class Signs implements Listener {
 								|| (lines[1].equalsIgnoreCase("FullSoup"))
 								|| lines[1].equalsIgnoreCase("Refill")) {
 							if (!p.hasPermission("kitpvp.refill")) {
-								Functions.tell(p, "§cYou do not have permission to refill.");
+								Functions.tell(p, "Â§cYou do not have permission to refill.");
 								return;
 							}
 							for(int i = 1; i <= 1; i++)
@@ -102,7 +102,7 @@ public class Signs implements Listener {
 								InventoryStuff.setStuff(p, lines[1]);
 							} else Functions.noPerm(p);
 						}
-					} else Functions.tell(p, "§cYou don't have permission to use signs.");
+					} else Functions.tell(p, "Â§cYou don't have permission to use signs.");
 				}
 			}
 		}
@@ -120,7 +120,7 @@ public class Signs implements Listener {
 						|| lines[1].equalsIgnoreCase("Refill")) {
 					e.setLine(0, prefix);
 					e.setLine(1, "Soups");
-					Functions.tell(p, "§aSuccessfully created sign!");
+					Functions.tell(p, "Â§aSuccessfully created sign!");
 					e.getBlock().getState().update();
 				}
 			} else breakSign = true;
@@ -128,7 +128,7 @@ public class Signs implements Listener {
 				if(lines[1].equalsIgnoreCase("Pyro")){
 					e.setLine(0, prefix);
 					e.setLine(1, "Pyro");
-					Functions.tell(p, "§aSuccessfully created sign!");
+					Functions.tell(p, "Â§aSuccessfully created sign!");
 					e.getBlock().getState().update();
 				}
 			} else breakSign = true;
@@ -136,7 +136,7 @@ public class Signs implements Listener {
 				if(lines[1].equalsIgnoreCase("Archer")){
 					e.setLine(0, prefix);
 					e.setLine(1, "Archer");
-					Functions.tell(p, "§aSuccessfully created sign!");
+					Functions.tell(p, "Â§aSuccessfully created sign!");
 					e.getBlock().getState().update();
 				}
 			} else breakSign = true;
@@ -144,7 +144,7 @@ public class Signs implements Listener {
 				if(lines[1].equalsIgnoreCase("PvP")){
 					e.setLine(0, prefix);
 					e.setLine(1, "PvP");
-					Functions.tell(p, "§aSuccessfully created sign!");
+					Functions.tell(p, "Â§aSuccessfully created sign!");
 					e.getBlock().getState().update();
 				}
 			} else breakSign = true;
@@ -152,7 +152,7 @@ public class Signs implements Listener {
 				if(lines[1].equalsIgnoreCase("Tank")){
 					e.setLine(0, prefix);
 					e.setLine(1, "Tank");
-					Functions.tell(p, "§aSuccessfully created sign!");
+					Functions.tell(p, "Â§aSuccessfully created sign!");
 					e.getBlock().getState().update();
 				}
 			} else breakSign = true;
@@ -160,7 +160,7 @@ public class Signs implements Listener {
 				if(lines[1].equalsIgnoreCase("Medic")){
 					e.setLine(0, prefix);
 					e.setLine(1, "Medic");
-					Functions.tell(p, "§aSuccessfully created sign!");
+					Functions.tell(p, "Â§aSuccessfully created sign!");
 					e.getBlock().getState().update();
 				}
 			} else breakSign = true;
@@ -168,7 +168,7 @@ public class Signs implements Listener {
 				if(lines[1].equalsIgnoreCase("Cupid")){
 					e.setLine(0, prefix);
 					e.setLine(1, "Cupid");
-					Functions.tell(p, "§aSuccessfully created sign!");
+					Functions.tell(p, "Â§aSuccessfully created sign!");
 					e.getBlock().getState().update();
 				}
 			} else breakSign = true;
@@ -186,11 +186,11 @@ public class Signs implements Listener {
 					|| lines[1].equalsIgnoreCase("Soups") || lines[1].equalsIgnoreCase("FullSoup")
 					|| lines[1].equalsIgnoreCase("Refill"))){
 				breakSign = true;
-				Functions.tell(p, "§cI was unabled to find that sign, please try again!");
+				Functions.tell(p, "Â§cI was unabled to find that sign, please try again!");
 			}
 			if (breakSign) {
 				e.getBlock().breakNaturally();
-				Functions.tell(p, "§cYou can't create those signs!");
+				Functions.tell(p, "Â§cYou can't create those signs!");
 			}
 		}
 	}

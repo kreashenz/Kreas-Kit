@@ -302,7 +302,7 @@ public class PManager {
 			pi = p.getInventory();
 			clear();
 			Functions.givePot(p, PotionEffectType.HEALTH_BOOST, 10, 3);
-			sword = Functions.name(new ItemStack(Material.IRON_HOE), "§9Iron Halberd");
+			sword = Functions.name(new ItemStack(Material.IRON_HOE), "Â§9Iron Halberd");
 			this.helm = new ItemStack(Material.CHAINMAIL_HELMET);
 			this.chest = new ItemStack(Material.CHAINMAIL_CHESTPLATE);
 			this.legs = new ItemStack(Material.CHAINMAIL_LEGGINGS);
@@ -327,7 +327,7 @@ public class PManager {
 			Functions.givePot(p, PotionEffectType.FIRE_RESISTANCE, 999999999, 1);
 			sword = new ItemStack(Material.STONE_SWORD, 1);		
 			pi.setArmorContents(new ItemStack[] {new ItemStack(Material.IRON_BOOTS), new ItemStack(Material.IRON_LEGGINGS), new ItemStack(Material.IRON_CHESTPLATE), new ItemStack(Material.IRON_HELMET)});
-			pi.addItem(sword, Functions.name(new ItemStack(Material.TNT, 16), "§rBombs"));
+			pi.addItem(sword, Functions.name(new ItemStack(Material.TNT, 16), "Â§rBombs"));
 			refill(32);
 		} else if(kit.equalsIgnoreCase("pvp")){
 			pi = p.getInventory();
@@ -354,7 +354,7 @@ public class PManager {
 		} else if(kit.equalsIgnoreCase("medic")){
 			pi = p.getInventory();
 			clear();
-			sword = Functions.name(new ItemStack(Material.IRON_SWORD), "§rScalpel");
+			sword = Functions.name(new ItemStack(Material.IRON_SWORD), "Â§rScalpel");
 			this.helm = setColour(new ItemStack(Material.LEATHER_HELMET), org.bukkit.Color.BLACK);
 			this.chest = setColour(new ItemStack(Material.LEATHER_CHESTPLATE), org.bukkit.Color.BLACK);
 			this.legs = setColour(new ItemStack(Material.LEATHER_LEGGINGS), org.bukkit.Color.BLACK);
@@ -413,7 +413,7 @@ public class PManager {
 			refill(33);
 			plugin.assassinList.add(name);
 		}
-		Functions.tell(p, "§7You chose the §6" + kit + "§7 kit!");
+		Functions.tell(p, "Â§7You chose the Â§6" + kit + "Â§7 kit!");
 		this.kit.put(p.getName(), kit);
 		p.updateInventory();
 	}
